@@ -9,6 +9,3 @@ Athey, Susan, Guido Imbens, Jonas Metzger,and Evan Munro.
 "Using Wasserstein Generative Adversial Networks for the Design of Monte Carlo Simulations."
 [arXiv:1909.02210](https://arxiv.org/abs/1909.02210). September 2019. 
 
-
-Authors: Evan Munro and Jonas Metzger
-We would also like to thank Cole Kissane for exceptional research assistance. 
