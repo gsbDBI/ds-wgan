@@ -1,0 +1,8 @@
+numpy
+torch
+tqdm
+tensorboardX
+tensorboard
+pandas
+matplotlib
+git+https://github.com/gbaydin/hypergradient-descent.git
