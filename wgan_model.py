@@ -73,6 +73,16 @@ class DataWrapper(object):
 
 
 class Specifications(object):
+    """Class for WGAN training specifications
+
+    Attributes:
+        data_wrapper: wgan_model.DataWrapper
+            Object constructed from training dataframe
+        critic_d_hidden: list
+            List of int length equal to the number of hidden layers in the critic,
+            giving the size of each hidden layer in the critic.
+        critic_dropout: float
+    """
     def __init__(self, data_wrapper,
                  critic_d_hidden = [128,128,128],
                  critic_dropout = 0.1,
@@ -84,13 +94,13 @@ class Specifications(object):
                  generator_lr = 1e-4,
                  generator_d_noise = "generator_d_output",
                  optimizer = "AdamHD",
-                 max_epochs = 6000,
+                 max_epochs = 1000,
                  batch_size = 32,
                  test_set_size = 16,
                  load_checkpoint = None,
                  save_checkpoint = None,
                  save_every = 100,
-                 print_every = 800,
+                 print_every = 200,
                  device = "cuda" if torch.cuda.is_available() else "cpu"):
 
         self.settings = locals()
