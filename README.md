@@ -16,7 +16,7 @@ For running the WGAN code outside of a Google Colab environment an installation 
 
 First, clone our repository. 
 ``` 
-git clone www.github.com/gsbDBI/ds-wgan 
+git clone https://www.github.com/gsbDBI/ds-wgan 
 ``` 
 
 Then, in the ds-wgan folder, run 
