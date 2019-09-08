@@ -15,7 +15,8 @@ The data folder contains the raw Lalonde-Dehejia-Wahba data. The trained_models 
 For running the WGAN code outside of a Google Colab environment an installation of [python3](https://www.python.org/downloads/) is required. 
 
 First, clone our repository. 
-``` git clone www.github.com/gsbDBI/ds-wgan 
+``` 
+git clone www.github.com/gsbDBI/ds-wgan 
 ``` 
 
 Then, in the ds-wgan folder, run 
