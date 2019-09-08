@@ -1,0 +1,640 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Source Code Documentation &mdash; wgan_model 0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="#" class="icon icon-home"> wgan_model
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <!-- Local TOC -->
+              <div class="local-toc"><ul>
+<li><a class="reference internal" href="#">Source Code Documentation</a></li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+</div>
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">wgan_model</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#">Docs</a> &raquo;</li>
+        
+      <li>Source Code Documentation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="source-code-documentation">
+<h1>Source Code Documentation<a class="headerlink" href="#source-code-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<span class="target" id="module-wgan_model"></span><p>Module for training and generating data from conditional and joint distributions
+using WGANs.</p>
+<p>Author: Jonas Metzger and Evan Munro</p>
+<dl class="class">
+<dt id="wgan_model.Critic">
+<em class="property">class </em><code class="sig-prename descclassname">wgan_model.</code><code class="sig-name descname">Critic</code><span class="sig-paren">(</span><em class="sig-param">specifications</em><span class="sig-paren">)</span><a class="headerlink" href="#wgan_model.Critic" title="Permalink to this definition">¶</a></dt>
+<dd><p>torch.nn.Module for critic in WGAN framework</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>specifications</strong> (<a class="reference internal" href="#wgan_model.Specifications" title="wgan_model.Specifications"><em>wgan_model.Specifications</em></a>) – </p>
+</dd>
+</dl>
+<dl class="attribute">
+<dt id="wgan_model.Critic.layers">
+<code class="sig-name descname">layers</code><a class="headerlink" href="#wgan_model.Critic.layers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dense neural network making up the critic</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>torch.nn.ModuleList</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="wgan_model.Critic.dropout">
+<code class="sig-name descname">dropout</code><a class="headerlink" href="#wgan_model.Critic.dropout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dropout layer applied between each of hidden layers</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>torch.nn.Dropout</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="wgan_model.Critic.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">context</em><span class="sig-paren">)</span><a class="headerlink" href="#wgan_model.Critic.forward" title="Permalink to this definition">¶</a></dt>
+<dd><p>Run critic model</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>torch.tensor</em>) – Real or generated data</p></li>
+<li><p><strong>context</strong> (<em>torch.tensor</em>) – Data conditioned on</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="wgan_model.Critic.gradient_penalty">
+<code class="sig-name descname">gradient_penalty</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">x_hat</em>, <em class="sig-param">context</em><span class="sig-paren">)</span><a class="headerlink" href="#wgan_model.Critic.gradient_penalty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate gradient penalty</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>torch.tensor</em>) – real data</p></li>
+<li><p><strong>x_hat</strong> (<em>torch.tensor</em>) – generated data</p></li>
+<li><p><strong>context</strong> (<em>torch.tensor</em>) – context data</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wgan_model.DataWrapper">
+<em class="property">class </em><code class="sig-prename descclassname">wgan_model.</code><code class="sig-name descname">DataWrapper</code><span class="sig-paren">(</span><em class="sig-param">df</em>, <em class="sig-param">continuous_vars=[]</em>, <em class="sig-param">categorical_vars=[]</em>, <em class="sig-param">context_vars=[]</em>, <em class="sig-param">continuous_lower_bounds={}</em>, <em class="sig-param">continuous_upper_bounds={}</em><span class="sig-paren">)</span><a class="headerlink" href="#wgan_model.DataWrapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class for processing raw training data for training Wasserstein GAN</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pandas.DataFrame</em>) – Training data frame, includes both variables to be generated, and
+variables to be conditioned on</p></li>
+<li><p><strong>continuous_vars</strong> (<em>list</em>) – List of str of continuous variables to be generated</p></li>
+<li><p><strong>categorical_vars</strong> (<em>list</em>) – List of str of categorical variables to be generated</p></li>
+<li><p><strong>context_vars</strong> (<em>list</em>) – List of str of variables that are conditioned on for cWGAN</p></li>
+<li><p><strong>continuous_lower_bounds</strong> (<em>dict</em>) – Key is element of continuous_vars, value is lower limit on that variable.</p></li>
+<li><p><strong>continuous_upper_bounds</strong> (<em>dict</em>) – Key is element of continuous_vars, value is upper limit on that variable.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="attribute">
+<dt id="wgan_model.DataWrapper.variables">
+<code class="sig-name descname">variables</code><a class="headerlink" href="#wgan_model.DataWrapper.variables" title="Permalink to this definition">¶</a></dt>
+<dd><p>Includes lists of names of continuous, categorical and context variables</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="wgan_model.DataWrapper.means">
+<code class="sig-name descname">means</code><a class="headerlink" href="#wgan_model.DataWrapper.means" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of means of continuous and context variables</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="wgan_model.DataWrapper.stds">
+<code class="sig-name descname">stds</code><a class="headerlink" href="#wgan_model.DataWrapper.stds" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of float of standard deviation of continuous and context variables</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="wgan_model.DataWrapper.cat_dims">
+<code class="sig-name descname">cat_dims</code><a class="headerlink" href="#wgan_model.DataWrapper.cat_dims" title="Permalink to this definition">¶</a></dt>
+<dd><p>List of dimension of each categorical variable</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="wgan_model.DataWrapper.cont_bounds">
+<code class="sig-name descname">cont_bounds</code><a class="headerlink" href="#wgan_model.DataWrapper.cont_bounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>formatted lower and upper bounds of continuous variables</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>torch.tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="wgan_model.DataWrapper.apply_critic">
+<code class="sig-name descname">apply_critic</code><span class="sig-paren">(</span><em class="sig-param">critic</em>, <em class="sig-param">df</em>, <em class="sig-param">colname='critic'</em><span class="sig-paren">)</span><a class="headerlink" href="#wgan_model.DataWrapper.apply_critic" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds column with critic output for each row the provided Dataframe</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>critic</strong> (<a class="reference internal" href="#wgan_model.Critic" title="wgan_model.Critic"><em>wgan_model.Critic</em></a>) – </p></li>
+<li><p><strong>df</strong> (<em>pandas.DataFrame</em>) – </p></li>
+<li><p><strong>colname</strong> (<em>str</em>) – Name of column to add to df with critic output value</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="wgan_model.DataWrapper.apply_generator">
+<code class="sig-name descname">apply_generator</code><span class="sig-paren">(</span><em class="sig-param">generator</em>, <em class="sig-param">df</em><span class="sig-paren">)</span><a class="headerlink" href="#wgan_model.DataWrapper.apply_generator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replaces columns in DataFrame that are generated by the generator, of
+size equal to the number of rows in the DataFrame that is passed</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pandas.DataFrame</em>) – Must contain columns generated by the generator,
+listed in self.variables[“continuous”] and
+self.variables[“categorical”]</p></li>
+<li><p><strong>generator</strong> (<a class="reference internal" href="#wgan_model.Generator" title="wgan_model.Generator"><em>wgan_model.Generator</em></a>) – Trained generator for simulating data</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Original DataFrame with columns replaced by generated data where possible.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="wgan_model.DataWrapper.deprocess">
+<code class="sig-name descname">deprocess</code><span class="sig-paren">(</span><em class="sig-param">x</em>, <em class="sig-param">context</em><span class="sig-paren">)</span><a class="headerlink" href="#wgan_model.DataWrapper.deprocess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unscale tensors from WGAN output to original scale</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>torch.tensor</em>) – Generated data</p></li>
+<li><p><strong>context</strong> (<em>torch.tensor</em>) – Data conditioned on</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>df</strong> – DataFrame with data converted back to original scale</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="wgan_model.DataWrapper.preprocess">
+<code class="sig-name descname">preprocess</code><span class="sig-paren">(</span><em class="sig-param">df</em><span class="sig-paren">)</span><a class="headerlink" href="#wgan_model.DataWrapper.preprocess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scale training data for training in WGANs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pandas.DataFrame</em>) – raw training data</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>x</strong> (<em>torch.tensor</em>) – training data to be generated by WGAN</p></li>
+<li><p><strong>context</strong> (<em>torch.tensor</em>) – training data to be conditioned on by WGAN</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wgan_model.Generator">
+<em class="property">class </em><code class="sig-prename descclassname">wgan_model.</code><code class="sig-name descname">Generator</code><span class="sig-paren">(</span><em class="sig-param">specifications</em><span class="sig-paren">)</span><a class="headerlink" href="#wgan_model.Generator" title="Permalink to this definition">¶</a></dt>
+<dd><p>torch.nn.Module class for generator network in WGAN</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>specifications</strong> (<a class="reference internal" href="#wgan_model.Specifications" title="wgan_model.Specifications"><em>wgan_model.Specifications</em></a>) – parameters for training WGAN</p>
+</dd>
+</dl>
+<dl class="attribute">
+<dt id="wgan_model.Generator.cont_bounds">
+<code class="sig-name descname">cont_bounds</code><a class="headerlink" href="#wgan_model.Generator.cont_bounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>formatted lower and upper bounds of continuous variables</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>torch.tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="wgan_model.Generator.cat_dims">
+<code class="sig-name descname">cat_dims</code><a class="headerlink" href="#wgan_model.Generator.cat_dims" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dimension of each categorical variable</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="wgan_model.Generator.d_cont">
+<code class="sig-name descname">d_cont</code><a class="headerlink" href="#wgan_model.Generator.d_cont" title="Permalink to this definition">¶</a></dt>
+<dd><p>Total dimension of continuous variables</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="wgan_model.Generator.d_cat">
+<code class="sig-name descname">d_cat</code><a class="headerlink" href="#wgan_model.Generator.d_cat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Total dimension of categorical variables</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="wgan_model.Generator.d_noise">
+<code class="sig-name descname">d_noise</code><a class="headerlink" href="#wgan_model.Generator.d_noise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dimension of noise input to generator</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="wgan_model.Generator.layers">
+<code class="sig-name descname">layers</code><a class="headerlink" href="#wgan_model.Generator.layers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dense neural network layers making up the generator</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>torch.nn.ModuleList</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="wgan_model.Generator.dropout">
+<code class="sig-name descname">dropout</code><a class="headerlink" href="#wgan_model.Generator.dropout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dropout layer based on specifications</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>torch.nn.Dropout</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="wgan_model.Generator.forward">
+<code class="sig-name descname">forward</code><span class="sig-paren">(</span><em class="sig-param">context</em><span class="sig-paren">)</span><a class="headerlink" href="#wgan_model.Generator.forward" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Run generator model</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>context</strong> (<em>torch.tensor</em>) – Variables to condition on</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>torch.tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="wgan_model.Specifications">
+<em class="property">class </em><code class="sig-prename descclassname">wgan_model.</code><code class="sig-name descname">Specifications</code><span class="sig-paren">(</span><em class="sig-param">data_wrapper, critic_d_hidden=[128, 128, 128], critic_dropout=0.1, critic_steps=15, critic_lr=0.0001, critic_gp_factor=5, generator_d_hidden=[128, 128, 128], generator_dropout=0.1, generator_lr=0.0001, generator_d_noise='generator_d_output', optimizer='AdamHD', max_epochs=1000, batch_size=32, test_set_size=16, load_checkpoint=None, save_checkpoint=None, save_every=100, print_every=200, device='cpu'</em><span class="sig-paren">)</span><a class="headerlink" href="#wgan_model.Specifications" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class used to set up WGAN training specifications before training
+Generator and Critic.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_wrapper</strong> (<a class="reference internal" href="#wgan_model.DataWrapper" title="wgan_model.DataWrapper"><em>wgan_model.DataWrapper</em></a>) – Object containing details on data frame to be trained</p></li>
+<li><p><strong>critic_d_hidden</strong> (<em>list</em>) – List of int, length equal to the number of hidden layers in the critic,
+giving the size of each hidden layer.</p></li>
+<li><p><strong>critic_dropout</strong> (<em>float</em>) – Dropout parameter for critic (see Srivastava et al 2014)</p></li>
+<li><p><strong>critic_steps</strong> (<em>int</em>) – Number of critic training steps taken for each generator training step</p></li>
+<li><p><strong>critic_lr</strong> (<em>float</em>) – Initial learning rate for critic</p></li>
+<li><p><strong>critic_gp_factor</strong> (<em>int</em>) – Weight on gradient penalty for critic loss function</p></li>
+<li><p><strong>generator_d_hidden</strong> (<em>list</em>) – List of int, length equal to the number of hidden layers in generator,
+giving the size of each hidden layer.</p></li>
+<li><p><strong>generator_dropout</strong> (<em>float</em>) – Dropout parameter for generator (See Srivastava et al 2014)</p></li>
+<li><p><strong>generator_lr</strong> (<em>float</em>) – Initial learning rate for generator</p></li>
+<li><p><strong>generator_d_noise</strong> (<em>int</em>) – The dimension of the noise input to the generator. Default sets to the
+output dimension of the generator.</p></li>
+<li><p><strong>optimizer</strong> (<em>str</em>) – The optimizer used for training the neural networks.</p></li>
+<li><p><strong>max_epochs</strong> (<em>int</em>) – The number of times to train the network on the whole dataset.</p></li>
+<li><p><strong>batch_size</strong> (<em>int</em>) – The batch size for each training iteration.</p></li>
+<li><p><strong>test_set_size</strong> (<em>int</em>) – Holdout test set for calculating out of sample wasserstein distance.</p></li>
+<li><p><strong>load_checkpoint</strong> (<em>str</em>) – Filepath to existing model weights to start training from.</p></li>
+<li><p><strong>save_checkpoint</strong> (<em>str</em>) – Filepath of folder to save model weights every save_every iterations</p></li>
+<li><p><strong>save_every</strong> (<em>int</em>) – If save_checkpoint is not None, then how often to save checkpoint of model
+weights during training.</p></li>
+<li><p><strong>print_every</strong> (<em>int</em>) – How often to print training status during training.</p></li>
+<li><p><strong>device</strong> (<em>str</em>) – Either “cuda” if GPU is available or “cpu” if not</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="attribute">
+<dt id="wgan_model.Specifications.settings">
+<code class="sig-name descname">settings</code><a class="headerlink" href="#wgan_model.Specifications.settings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Contains the neural network-related settings for training</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="wgan_model.Specifications.data">
+<code class="sig-name descname">data</code><a class="headerlink" href="#wgan_model.Specifications.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Contains settings related to the data dimension and bounds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="wgan_model.compare_dfs">
+<code class="sig-prename descclassname">wgan_model.</code><code class="sig-name descname">compare_dfs</code><span class="sig-paren">(</span><em class="sig-param">df_real</em>, <em class="sig-param">df_fake</em>, <em class="sig-param">scatterplot={'samples': 400</em>, <em class="sig-param">'x': []</em>, <em class="sig-param">'y': []}</em>, <em class="sig-param">table_groupby=[]</em>, <em class="sig-param">histogram={'ncol': 1</em>, <em class="sig-param">'nrow': 1</em>, <em class="sig-param">'variables': []}</em>, <em class="sig-param">figsize=3</em><span class="sig-paren">)</span><a class="headerlink" href="#wgan_model.compare_dfs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Diagnostic function for comparing real and generated data from WGAN models.
+Prints out comparison of means, comparisons of standard deviations, and histograms
+and scatterplots.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_real</strong> (<em>pandas.DataFrame</em>) – real data</p></li>
+<li><p><strong>df_fake</strong> (<em>pandas.DataFrame</em>) – data produced by generator</p></li>
+<li><p><strong>scatterplot</strong> (<em>dict</em>) – Contains specifications for plotting scatterplots of variables in real and fake data</p></li>
+<li><p><strong>table_groupby</strong> (<em>list</em>) – List of variables to group mean and standard deviation table by</p></li>
+<li><p><strong>histogram</strong> (<em>dict</em>) – Contains specifications for plotting histograms comparing marginal densities
+of real and fake data</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="wgan_model.train">
+<code class="sig-prename descclassname">wgan_model.</code><code class="sig-name descname">train</code><span class="sig-paren">(</span><em class="sig-param">generator</em>, <em class="sig-param">critic</em>, <em class="sig-param">x</em>, <em class="sig-param">context</em>, <em class="sig-param">specifications</em><span class="sig-paren">)</span><a class="headerlink" href="#wgan_model.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function for training generator and critic in conditional WGAN-GP
+If context is empty, trains a regular WGAN-GP. See Gulrajani et al 2017
+for details on training procedure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>generator</strong> (<a class="reference internal" href="#wgan_model.Generator" title="wgan_model.Generator"><em>wgan_model.Generator</em></a>) – Generator network to be trained</p></li>
+<li><p><strong>critic</strong> (<a class="reference internal" href="#wgan_model.Critic" title="wgan_model.Critic"><em>wgan_model.Critic</em></a>) – Critic network to be trained</p></li>
+<li><p><strong>x</strong> (<em>torch.tensor</em>) – Training data for generated data</p></li>
+<li><p><strong>context</strong> (<em>torch.tensor</em>) – Data conditioned on for generating data</p></li>
+<li><p><strong>specifications</strong> (<a class="reference internal" href="#wgan_model.Specifications" title="wgan_model.Specifications"><em>wgan_model.Specifications</em></a>) – Includes all the tuning parameters for training</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Evan Munro and Jonas Metzger
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

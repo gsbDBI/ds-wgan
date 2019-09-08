@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Wed Aug 14 10:20:21 2019
+Module for training and generating data from conditional and joint distributions
+using WGANs.
 
-@author: Jonas Metzger and Evan Munro
+Author: Jonas Metzger and Evan Munro
 """
 
 import torch
@@ -380,7 +381,7 @@ class Critic(nn.Module):
 
         Returns
         -------
-        torch.tensor 
+        torch.tensor
         """
         alpha = torch.randn(x.size(0)).unsqueeze(1).to(x.device)
         interpolated = x * alpha + x_hat * (1 - alpha)
