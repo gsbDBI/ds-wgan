@@ -35,7 +35,7 @@ class DataWrapper(object):
     def preprocess(self, df):
         continuous, context = [torch.tensor(np.array(df[self.variables[_]])).to(torch.float) for _ in ("continuous", "context")]
         continuous, context = [(x-m)/s for x,m,s in zip([continuous, context], self.means, self.stds)]
-        if len(self.variables["categorical"]) > 0: 
+        if len(self.variables["categorical"]) > 0:
             categorical = torch.tensor(pd.get_dummies(df[self.variables["categorical"]], columns=self.variables["categorical"]).to_numpy())
             return torch.cat([continuous, categorical.to(torch.float)], -1), context
         else:
@@ -73,24 +73,24 @@ class DataWrapper(object):
 
 
 class Specifications(object):
-    def __init__(self, data_wrapper, 
-                 critic_d_hidden = [],
+    def __init__(self, data_wrapper,
+                 critic_d_hidden = [128,128,128],
                  critic_dropout = 0.1,
                  critic_steps = 15,
                  critic_lr = 1e-4,
                  critic_gp_factor = 5,
-                 generator_d_hidden = [],
+                 generator_d_hidden = [128,128,128],
                  generator_dropout = 0.1,
                  generator_lr = 1e-4,
                  generator_d_noise = "generator_d_output",
                  optimizer = "AdamHD",
-                 max_epochs = 1000,
+                 max_epochs = 6000,
                  batch_size = 32,
                  test_set_size = 16,
                  load_checkpoint = None,
                  save_checkpoint = None,
-                 save_every = 1,
-                 print_every = 1,
+                 save_every = 100,
+                 print_every = 800,
                  device = "cuda" if torch.cuda.is_available() else "cpu"):
 
         self.settings = locals()
@@ -101,7 +101,7 @@ class Specifications(object):
         d_x = d_cont + sum(data_wrapper.cat_dims)
         if generator_d_noise == "generator_d_output":
             self.settings.update(generator_d_noise = d_x)
-        self.data = dict(d_context=d_context, d_x=d_x, 
+        self.data = dict(d_context=d_context, d_x=d_x,
                          cat_dims=data_wrapper.cat_dims,
                          cont_bounds=data_wrapper.cont_bounds)
 
@@ -229,7 +229,7 @@ def train(generator, critic, x, context, specifications):
                 n_batches += 1
         WD_test /= n_batches
         # diagnostics
-        if epoch % s["print_every"] == 0: 
+        if epoch % s["print_every"] == 0:
             description = "epoch {} | step {} | WD_test {} | WD_train {} | sec passed {} |".format(
             epoch, step, round(WD_test, 2), round(WD_train, 2), round(time() - t))
             print(description)
@@ -272,8 +272,8 @@ def compare_dfs(df_real, df_fake, scatterplot=dict(x=[], y=[], samples=400),
         fig2, axarr2 = plt.subplots(histogram["nrow"], histogram["ncol"],
                                     figsize=(histogram["nrow"]*figsize, histogram["ncol"]*figsize))
         v = 0
-        for i in range(histogram["nrow"]): 
-            for j in range(histogram["ncol"]): 
+        for i in range(histogram["nrow"]):
+            for j in range(histogram["ncol"]):
                 plot_var, v = histogram["variables"][v], v+1
                 axarr2[i][j].hist([df_real[plot_var], df_fake[plot_var]], bins=8, density=1,
                                   histtype='bar', label=["real", "fake"], color=["blue", "red"])
@@ -310,19 +310,19 @@ if __name__ == "__main__":
 
     data_wrapper = DataWrapper(df, continuous_vars, categorical_vars, context_vars, continuous_lower_bounds)
     x, context = data_wrapper.preprocess(df)
-    
+
     specifications = Specifications(data_wrapper)
 
     generator = Generator(specifications)
     critic = Critic(specifications)
 
     train(generator, critic, x, context, specifications)
-    
+
     df = data_wrapper.apply_critic(critic, df, colname="critic")
     df_fake = data_wrapper.apply_generator(generator, df.sample(int(1e5), replace=True))
     df_fake = data_wrapper.apply_critic(critic, df_fake, colname="critic")
-    
-    compare_dfs(df, df_fake, 
+
+    compare_dfs(df, df_fake,
                 scatterplot=dict(x=["t", "age", "education", "re74", "married"],
                                  y=["re78", "critic"], samples=400),
                 table_groupby=["t"],
