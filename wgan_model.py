@@ -46,8 +46,8 @@ class DataWrapper(object):
         List of float of standard deviation of continuous and context variables
     cat_dims: list
         List of dimension of each categorical variable
-    cont_bounds: list
-        List of torch.tensor of lower and upper bounds of continuous variables
+    cont_bounds: torch.tensor
+        formatted lower and upper bounds of continuous variables
     """
     def __init__(self, df, continuous_vars=[], categorical_vars=[], context_vars=[],
                  continuous_lower_bounds = dict(), continuous_upper_bounds = dict()):
@@ -253,6 +253,32 @@ class Specifications(object):
 
 
 class Generator(nn.Module):
+    """
+    torch.nn.Module class for generator network in WGAN
+
+    Parameters
+    ----------
+    specifications: wgan_model.Specifications
+        parameters for training WGAN
+
+    Attributes
+    ----------
+    cont_bounds: torch.tensor
+        formatted lower and upper bounds of continuous variables
+    cat_dims: list
+        Dimension of each categorical variable
+    d_cont: int
+        Total dimension of continuous variables
+    d_cat: int
+        Total dimension of categorical variables
+    d_noise: int
+        Dimension of noise input to generator
+    layers: torch.nn.ModuleList
+        Dense neural network layers making up the generator
+    dropout: torch.nn.Dropout
+        Dropout layer based on specifications
+
+    """
     def __init__(self, specifications):
         super().__init__()
         s, d = specifications.settings, specifications.data
@@ -266,7 +292,7 @@ class Generator(nn.Module):
         self.layers = nn.ModuleList([nn.Linear(i, o) for i, o in zip(d_in, d_out)])
         self.dropout = nn.Dropout(s["generator_dropout"])
 
-    def transform(self, hidden):
+    def _transform(self, hidden):
         continuous, categorical = hidden.split([self.d_cont, self.d_cat], -1)
         # apply bounds to continuous
         bounds = self.cont_bounds.to(hidden.device)
@@ -277,14 +303,40 @@ class Generator(nn.Module):
         return torch.cat([continuous, categorical], -1)
 
     def forward(self, context):
+        """
+            Run generator model
+
+        Parameters
+        ----------
+        context: torch.tensor
+            Variables to condition on
+
+        Returns
+        -------
+        torch.tensor
+        """
         noise = torch.randn(context.size(0), self.d_noise).to(context.device)
         x = torch.cat([noise, context], -1)
         for layer in self.layers[:-1]:
             x = self.dropout(F.relu(layer(x)))
-        return self.transform(self.layers[-1](x))
+        return self._transform(self.layers[-1](x))
 
 
 class Critic(nn.Module):
+    """
+    torch.nn.Module for critic in WGAN framework
+
+    Parameters
+    ----------
+    specifications: wgan_model.Specifications
+
+    Attributes
+    ----------
+    layers: torch.nn.ModuleList
+        Dense neural network making up the critic
+    dropout: torch.nn.Dropout
+        Dropout layer applied between each of hidden layers
+    """
     def __init__(self, specifications):
         super().__init__()
         s, d = specifications.settings, specifications.data
@@ -294,12 +346,42 @@ class Critic(nn.Module):
         self.dropout = nn.Dropout(s["critic_dropout"])
 
     def forward(self, x, context):
+        """
+        Run critic model
+
+        Parameters
+        ----------
+        x: torch.tensor
+            Real or generated data
+        context: torch.tensor
+            Data conditioned on
+
+        Returns
+        -------
+        torch.tensor
+        """
         x = torch.cat([x, context], -1)
         for layer in self.layers[:-1]:
             x = self.dropout(F.relu(layer(x)))
         return self.layers[-1](x)
 
     def gradient_penalty(self, x, x_hat, context):
+        """
+        Calculate gradient penalty
+
+        Parameters
+        ----------
+        x: torch.tensor
+            real data
+        x_hat: torch.tensor
+            generated data
+        context: torch.tensor
+            context data
+
+        Returns
+        -------
+        torch.tensor 
+        """
         alpha = torch.randn(x.size(0)).unsqueeze(1).to(x.device)
         interpolated = x * alpha + x_hat * (1 - alpha)
         interpolated = torch.autograd.Variable(interpolated.detach(), requires_grad=True)
@@ -312,6 +394,24 @@ class Critic(nn.Module):
 
 
 def train(generator, critic, x, context, specifications):
+    """
+    Function for training generator and critic in conditional WGAN-GP
+    If context is empty, trains a regular WGAN-GP. See Gulrajani et al 2017
+    for details on training procedure.
+
+    Parameters
+    ----------
+    generator: wgan_model.Generator
+        Generator network to be trained
+    critic: wgan_model.Critic
+        Critic network to be trained
+    x: torch.tensor
+        Training data for generated data
+    context: torch.tensor
+        Data conditioned on for generating data
+    specifications: wgan_model.Specifications
+        Includes all the tuning parameters for training
+    """
     # setup training objects
     s = specifications.settings
     start_epoch, step, description, device, t = 0, 1, "", s["device"], time()
@@ -389,6 +489,26 @@ def train(generator, critic, x, context, specifications):
 def compare_dfs(df_real, df_fake, scatterplot=dict(x=[], y=[], samples=400),
                 table_groupby=[], histogram=dict(variables=[], nrow=1, ncol=1),
                 figsize=3):
+    """
+    Diagnostic function for comparing real and generated data from WGAN models.
+    Prints out comparison of means, comparisons of standard deviations, and histograms
+    and scatterplots.
+
+    Parameters
+    ----------
+    df_real: pandas.DataFrame
+        real data
+    df_fake: pandas.DataFrame
+        data produced by generator
+    scatterplot: dict
+        Contains specifications for plotting scatterplots of variables in real and fake data
+    table_groupby: list
+        List of variables to group mean and standard deviation table by
+    histogram: dict
+        Contains specifications for plotting histograms comparing marginal densities
+        of real and fake data
+
+    """
     # data prep
     if "source" in list(df_real.columns): df_real = df_real.drop("source", axis=1)
     if "source" in list(df_fake.columns): df_fake = df_fake.drop("source", axis=1)
