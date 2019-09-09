@@ -7,6 +7,7 @@ Source Code Documentation
    :maxdepth: 2
    :caption: Contents:
 
+
 .. automodule:: wgan_model
    :members:
 
