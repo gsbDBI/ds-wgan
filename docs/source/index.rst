@@ -8,7 +8,7 @@ Source Code Documentation
    :caption: Contents:
 
 
-.. automodule:: wgan_model
+.. autoapimodule:: wgan_model
    :members:
 
 
