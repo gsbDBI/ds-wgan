@@ -35,7 +35,9 @@ extensions = ['sphinx.ext.autodoc', 'autoapi.extension','sphinx_rtd_theme', 'sph
 
 autoapi_dirs=['../../']
 
-autoapi_generate_api_docs = False 
+autoapi_generate_api_docs = False
+autoapi_type = 'python'
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
