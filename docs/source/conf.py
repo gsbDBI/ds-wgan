@@ -35,6 +35,8 @@ extensions = ['sphinx.ext.autodoc', 'autoapi.extension','sphinx_rtd_theme', 'sph
 
 autoapi_dirs=['../../']
 
+master_doc='index'
+
 autoapi_generate_api_docs = False
 autoapi_type = 'python'
 
