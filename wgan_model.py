@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Wed Aug 14 10:20:21 2019
 
@@ -380,7 +378,7 @@ class Critic(nn.Module):
 
         Returns
         -------
-        torch.tensor 
+        torch.tensor
         """
         alpha = torch.randn(x.size(0)).unsqueeze(1).to(x.device)
         interpolated = x * alpha + x_hat * (1 - alpha)
@@ -561,36 +559,3 @@ def compare_dfs(df_real, df_fake, scatterplot=dict(x=[], y=[], samples=400),
                 s.set_ylabel(y)
                 s.set_xlabel(x)
         fig3.show()
-
-
-if __name__ == "__main__":
-    file = "data/original_data/cps_merged.feather"
-    df = pd.read_feather(file)
-
-    continuous_vars = ["age", "education", "re74", "re75", "re78"]
-    continuous_lower_bounds = {"re74": 0, "re75": 0, "re78": 0}
-    categorical_vars = ["black", "hispanic", "married", "nodegree"]
-    context_vars = ["t"]
-
-    data_wrapper = DataWrapper(df, continuous_vars, categorical_vars, context_vars, continuous_lower_bounds)
-    x, context = data_wrapper.preprocess(df)
-
-    specifications = Specifications(data_wrapper)
-
-    generator = Generator(specifications)
-    critic = Critic(specifications)
-
-    train(generator, critic, x, context, specifications)
-
-    df = data_wrapper.apply_critic(critic, df, colname="critic")
-    df_fake = data_wrapper.apply_generator(generator, df.sample(int(1e5), replace=True))
-    df_fake = data_wrapper.apply_critic(critic, df_fake, colname="critic")
-
-    compare_dfs(df, df_fake,
-                scatterplot=dict(x=["t", "age", "education", "re74", "married"],
-                                 y=["re78", "critic"], samples=400),
-                table_groupby=["t"],
-                histogram=dict(variables=['black', 'hispanic', 'married', 'nodegree',
-                                          're74', 're75', 're78', 'education', 'age'],
-                               nrow=3, ncol=3),
-                figsize=3)
