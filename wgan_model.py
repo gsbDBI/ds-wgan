@@ -555,7 +555,7 @@ def compare_dfs(df_real, df_fake, scatterplot=dict(x=[], y=[], samples=400),
                 axarr2[i][j].legend(prop={"size": 10})
                 axarr2[i][j].set_title(plot_var)
         if save:
-            fig2.savefig(path+_'hist.png')
+            fig2.savefig(path+'_hist.png')
         else:
             fig2.show()
     # scatterplot grid
