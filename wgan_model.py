@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Module for training and generating data from conditional and joint distributions
 using WGANs.
@@ -489,7 +487,7 @@ def train(generator, critic, x, context, specifications):
 
 def compare_dfs(df_real, df_fake, scatterplot=dict(x=[], y=[], samples=400),
                 table_groupby=[], histogram=dict(variables=[], nrow=1, ncol=1),
-                figsize=3):
+                figsize=3,save=False,path=""):
     """
     Diagnostic function for comparing real and generated data from WGAN models.
     Prints out comparison of means, comparisons of standard deviations, and histograms
@@ -508,7 +506,10 @@ def compare_dfs(df_real, df_fake, scatterplot=dict(x=[], y=[], samples=400),
     histogram: dict
         Contains specifications for plotting histograms comparing marginal densities
         of real and fake data
-
+    save: bool
+        Indicate whether to save results to file or print them
+    path: string
+        Path to save diagnostics for model
     """
     # data prep
     if "source" in list(df_real.columns): df_real = df_real.drop("source", axis=1)
@@ -519,12 +520,21 @@ def compare_dfs(df_real, df_fake, scatterplot=dict(x=[], y=[], samples=400),
     df_real, df_fake = df_real.drop("source", axis=1), df_fake.drop("source", axis=1)
     common_cols = [c for c in df_real.columns if c in df_fake.columns]
     # mean and std table
-    print("-------------comparison of means-------------")
+
     means = df_joined.groupby(table_groupby + ["source"]).mean().round(2).transpose()
-    print(means)
-    print("-------------comparison of stds-------------")
+    if save:
+        means.to_csv(path+"_means.txt",sep=" ")
+    else:
+        print("-------------comparison of means-------------")
+        print(means)
+
     stds = df_joined.groupby(table_groupby + ["source"]).std().round(2).transpose()
-    print(stds)
+
+    if save:
+        stds.to_csv(path+"_stds.txt",sep=" ")
+    else:
+        print("-------------comparison of stds-------------")
+        print(stds)
     # covariance matrix comparison
     fig1 = plt.figure(figsize=(figsize * 2, figsize * 1))
     s1 = [fig1.add_subplot(1, 2, i) for i in range(1, 3)]
@@ -544,7 +554,10 @@ def compare_dfs(df_real, df_fake, scatterplot=dict(x=[], y=[], samples=400),
                                   histtype='bar', label=["real", "fake"], color=["blue", "red"])
                 axarr2[i][j].legend(prop={"size": 10})
                 axarr2[i][j].set_title(plot_var)
-        fig2.show()
+        if save:
+            fig2.savefig(path+_'hist.png')
+        else:
+            fig2.show()
     # scatterplot grid
     if scatterplot and len(scatterplot["x"]) * len(scatterplot["y"]) > 0:
         df_real_sample = df_real.sample(scatterplot["samples"])
@@ -561,37 +574,8 @@ def compare_dfs(df_real, df_fake, scatterplot=dict(x=[], y=[], samples=400),
                 s.scatter(x_fake, y_fake, color="red")
                 s.set_ylabel(y)
                 s.set_xlabel(x)
-        fig3.show()
 
-
-if __name__ == "__main__":
-    file = "data/original_data/cps_merged.feather"
-    df = pd.read_feather(file)
-
-    continuous_vars = ["age", "education", "re74", "re75", "re78"]
-    continuous_lower_bounds = {"re74": 0, "re75": 0, "re78": 0}
-    categorical_vars = ["black", "hispanic", "married", "nodegree"]
-    context_vars = ["t"]
-
-    data_wrapper = DataWrapper(df, continuous_vars, categorical_vars, context_vars, continuous_lower_bounds)
-    x, context = data_wrapper.preprocess(df)
-
-    specifications = Specifications(data_wrapper)
-
-    generator = Generator(specifications)
-    critic = Critic(specifications)
-
-    train(generator, critic, x, context, specifications)
-
-    df = data_wrapper.apply_critic(critic, df, colname="critic")
-    df_fake = data_wrapper.apply_generator(generator, df.sample(int(1e5), replace=True))
-    df_fake = data_wrapper.apply_critic(critic, df_fake, colname="critic")
-
-    compare_dfs(df, df_fake,
-                scatterplot=dict(x=["t", "age", "education", "re74", "married"],
-                                 y=["re78", "critic"], samples=400),
-                table_groupby=["t"],
-                histogram=dict(variables=['black', 'hispanic', 'married', 'nodegree',
-                                          're74', 're75', 're78', 'education', 'age'],
-                               nrow=3, ncol=3),
-                figsize=3)
+        if save:
+            fig3.savefig(path+'_scatter.png')
+        else:
+            fig3.show()
