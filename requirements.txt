@@ -5,4 +5,5 @@ tensorboardX
 tensorboard
 pandas
 matplotlib
+scipy
 git+https://github.com/gbaydin/hypergradient-descent.git
