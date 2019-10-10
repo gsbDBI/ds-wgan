@@ -1,0 +1,14 @@
+name: wgan
+dependencies:
+  - python>=3.6
+  - jupyterlab>=0.35.4
+  - numpy
+  - tqdm
+  - pyarrow
+  - pandas
+  - matplotlib
+  - seaborn
+  - flake8
+  - pip:
+    - git+https://github.com/gbaydin/hypergradient-descent.git
+    - torch>=1.1.0
