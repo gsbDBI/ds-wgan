@@ -220,7 +220,7 @@ class Specifications(object):
     """
     def __init__(self, data_wrapper,
                  critic_d_hidden = [128,128,128],
-                 critic_dropout = 0.1,
+                 critic_dropout = 0,
                  critic_steps = 15,
                  critic_lr = 1e-4,
                  critic_gp_factor = 5,
@@ -228,7 +228,7 @@ class Specifications(object):
                  generator_dropout = 0.1,
                  generator_lr = 1e-4,
                  generator_d_noise = "generator_d_output",
-                 gaussian_similarity_penalty = 0,
+                 gaussian_similarity_penalty = None,
                  optimizer = "AdamHD",
                  max_epochs = 1000,
                  batch_size = 32,
@@ -476,7 +476,8 @@ def train(generator, critic, x, context, specifications):
                 WD = critic_x - critic_x_hat
                 loss = - WD 
                 loss += s["critic_gp_factor"] * critic.gradient_penalty(x, x_hat, context)
-                loss += s["gaussian_similarity_penalty"] * critic.gaussian_similarity(x_hat, context)
+                if s["gaussian_similarity_penalty"] is not None:
+                    loss += s["gaussian_similarity_penalty"] * critic.gaussian_similarity(x_hat, context)
                 loss.backward()
                 opt_critic.step()
                 WD_train += WD.item()
@@ -584,7 +585,7 @@ def compare_dfs(df_real, df_fake, scatterplot=dict(x=[], y=[], samples=400),
                 x_fake, y_fake = df_fake_sample[x].to_numpy(), df_fake_sample[y].to_numpy()
                 from math import sqrt,pi
                 def fit(xx, yy):
-                    xx, yy = torch.tensor(xx), torch.tensor(yy)
+                    xx, yy = torch.tensor(xx).to(torch.float), torch.tensor(yy).to(torch.float)
                     xx = (xx - xx.mean())/ xx.std()
                     bw = 1e-9 + scatterplot["smooth"] # * (xx.max()-xx.min())
                     dist = (xx.unsqueeze(0) - xx.unsqueeze(1)).pow(2)/bw
