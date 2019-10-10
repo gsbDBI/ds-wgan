@@ -1,8 +1,26 @@
 import os
+import subprocess
+from os.path import join
+from random import choice
 
 import pandas as pd
 import torch
 import wgan
+from utils import *
+
+# Output setup
+out_dir = get_write_dir(__file__)
+if not os.path.exists(out_dir):
+    os.mkdir(out_dir)
+
+# Simulation setup
+if on_sherlock():
+    batch_sizes = [1024, 2048]
+    batch_size = choice(batch_sizes)
+    max_epoch = 100
+else:
+    max_epoch = 100
+    batch_size = 35
 
 # Hardware setup
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
@@ -43,8 +61,8 @@ data_wrappers = [
 ]
 specs = [
     wgan.Specifications(dw,
-                        batch_size=2048,
-                        max_epochs=100,
+                        batch_size=batch_size,
+                        max_epochs=max_epoch,
                         print_every=50,
                         device=device)
     for dw in data_wrappers
@@ -71,21 +89,28 @@ df_generated_cf = df_generated
 df_generated_cf["t"] = 1 - df_generated_cf["t"]
 df_generated["re78_cf"] = data_wrappers[1].apply_generator(generators[1], df_generated_cf)["re78"]
 
+# Save all configurations
+df_generated["batch_size"] = batch_size
+df_generated["max_epoch"] = max_epoch
+df_generated["complexity"] = specs[0].settings["gaussian_similarity_penalty"]
+
+filename = f"{get_id()}.feather"
+
 # save to .feather
-output_filename = "data/generated/{}_generated_complexity_{}.feather".format(name, specs[
-    0].settings["gaussian_similarity_penalty"])
+output_filename = join(out_dir, filename)
 df_generated.to_feather(output_filename)
 
-print("att:", ((df_generated.re78 - df_generated.re78_cf) * (2 * df_generated.t - 1)).mean())
-
-wgan.compare_dfs(df,
-                 df_generated,
-                 scatterplot=dict(x=["re74", "age", "education"],
-                                  y=["re78", "re75"],
-                                  samples=400,
-                                  smooth=0),
-                 table_groupby=["t"],
-                 histogram=dict(variables=["re78", "re74", "age", "education"],
-                                nrow=2,
-                                ncol=2),
-                 figsize=3)
+# Plots and stuff
+# print("att:", ((df_generated.re78 - df_generated.re78_cf) * (2 * df_generated.t - 1)).mean())
+# 
+# wgan.compare_dfs(df,
+#                  df_generated,
+#                  scatterplot=dict(x=["re74", "age", "education"],
+#                                   y=["re78", "re75"],
+#                                   samples=400,
+#                                   smooth=0),
+#                  table_groupby=["t"],
+#                  histogram=dict(variables=["re78", "re74", "age", "education"],
+#                                 nrow=2,
+#                                 ncol=2),
+#                  figsize=3)
