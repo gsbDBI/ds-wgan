@@ -515,7 +515,7 @@ def train(generator, critic, x, context, specifications):
                         "opt_critic_state_dict": opt_critic.state_dict()}, s["save_checkpoint"])
 
 
-def compare_dfs(df_real, df_fake, scatterplot=dict(x=[], y=[], samples=400),
+def compare_dfs(df_real, df_fake, scatterplot=dict(x=[], y=[], samples=400, smooth=0),
                 table_groupby=[], histogram=dict(variables=[], nrow=1, ncol=1),
                 figsize=3):
     """
