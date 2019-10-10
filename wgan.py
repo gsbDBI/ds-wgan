@@ -77,13 +77,15 @@ class DataWrapper(object):
         context: torch.tensor
             training data to be conditioned on by WGAN
         """
-        continuous, context = [torch.tensor(np.array(df[self.variables[_]])).to(torch.float) for _ in ("continuous", "context")]
-        continuous, context = [(x-m)/s for x,m,s in zip([continuous, context], self.means, self.stds)]
+        x, context = [torch.tensor(np.array(df[self.variables[_]])).to(torch.float) for _ in ("continuous", "context")]
+        x, context = [(x-m)/s for x,m,s in zip([x, context], self.means, self.stds)]
         if len(self.variables["categorical"]) > 0:
             categorical = torch.tensor(pd.get_dummies(df[self.variables["categorical"]], columns=self.variables["categorical"]).to_numpy())
-            return torch.cat([continuous, categorical.to(torch.float)], -1), context
-        else:
-            return continuous, context
+            x = torch.cat([x, categorical.to(torch.float)], -1)
+        total = torch.cat([x, context], -1)
+        if not torch.all(total==total):
+            raise RuntimeError("It looks like there are NaNs your data, at least after preprocessing. This is currently not supported!")
+        return x, context
 
     def deprocess(self, x, context):
         """
