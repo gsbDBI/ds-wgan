@@ -1,0 +1,11 @@
+#!/bin/bash
+#SBATCH --job-name=havigan
+#SBATCH --array=0-2
+#SBATCH --ntasks=1
+#SBATCH --time=02:00:00
+#SBATCH --mem-per-cpu=4G
+
+source activate wgan
+cd ~/ds-wgan/scripts/
+
+python simulations.py
