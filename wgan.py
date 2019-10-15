@@ -78,13 +78,15 @@ class DataWrapper(object):
         context: torch.tensor
             training data to be conditioned on by WGAN
         """
-        continuous, context = [torch.tensor(np.array(df[self.variables[_]])).to(torch.float) for _ in ("continuous", "context")]
-        continuous, context = [(x-m)/s for x,m,s in zip([continuous, context], self.means, self.stds)]
+        x, context = [torch.tensor(np.array(df[self.variables[_]])).to(torch.float) for _ in ("continuous", "context")]
+        x, context = [(x-m)/s for x,m,s in zip([x, context], self.means, self.stds)]
         if len(self.variables["categorical"]) > 0:
             categorical = torch.tensor(pd.get_dummies(df[self.variables["categorical"]], columns=self.variables["categorical"]).to_numpy())
-            return torch.cat([continuous, categorical.to(torch.float)], -1), context
-        else:
-            return continuous, context
+            x = torch.cat([x, categorical.to(torch.float)], -1)
+        total = torch.cat([x, context], -1)
+        if not torch.all(total==total):
+            raise RuntimeError("It looks like there are NaNs your data, at least after preprocessing. This is currently not supported!")
+        return x, context
 
     def deprocess(self, x, context):
         """
@@ -177,7 +179,7 @@ class Specifications(object):
         Number of critic training steps taken for each generator training step
     critic_lr: float
         Initial learning rate for critic
-    critic_gp_factor: int
+    critic_gp_factor: float
         Weight on gradient penalty for critic loss function
     generator_d_hidden: list
         List of int, length equal to the number of hidden layers in generator,
@@ -189,6 +191,9 @@ class Specifications(object):
     generator_d_noise: int
         The dimension of the noise input to the generator. Default sets to the
         output dimension of the generator.
+    gaussian_similarity_penalty: float
+        Positive values incentivize dissimilarity of the unconditional generator
+        distribution to the 'closest' multivariate Gaussian distribution
     optimizer: str
         The optimizer used for training the neural networks.
     max_epochs: int
@@ -218,7 +223,7 @@ class Specifications(object):
     """
     def __init__(self, data_wrapper,
                  critic_d_hidden = [128,128,128],
-                 critic_dropout = 0.1,
+                 critic_dropout = 0,
                  critic_steps = 15,
                  critic_lr = 1e-4,
                  critic_gp_factor = 5,
@@ -226,6 +231,7 @@ class Specifications(object):
                  generator_dropout = 0.1,
                  generator_lr = 1e-4,
                  generator_d_noise = "generator_d_output",
+                 gaussian_similarity_penalty = None,
                  optimizer = "AdamHD",
                  max_epochs = 1000,
                  batch_size = 32,
@@ -391,6 +397,28 @@ class Critic(nn.Module):
         # penalty = (gradients.norm(2, dim=1) - 1).pow(2).mean()          # two-sided
         return penalty
 
+    def gaussian_similarity(self, x_hat, context, eps=1e-4):
+        """
+        Calculates similarity to the closest gaussian distribution
+
+        Parameters
+        ----------
+        x_hat: torch.tensor
+            generated data
+        context: torch.tensor
+            context data
+
+        Returns
+        -------
+        torch.tensor
+        """
+        x = torch.cat([x_hat, context], dim=1)
+        mean = x.mean(0, keepdim=True)
+        cov = x.t().mm(x) / x.size(0) - mean.t().mm(mean) + eps * torch.rand_like(x[0]).diag()
+        gaussian = torch.distributions.MultivariateNormal(mean.detach(), cov.detach())
+        loglik = gaussian.log_prob(x).mean()
+        return loglik
+
 
 def train(generator, critic, x, context, specifications):
     """
@@ -449,7 +477,10 @@ def train(generator, critic, x, context, specifications):
             if not generator_update:
                 critic_x = critic(x, context).mean()
                 WD = critic_x - critic_x_hat
-                loss = - WD + s["critic_gp_factor"] * critic.gradient_penalty(x, x_hat, context)
+                loss = - WD
+                loss += s["critic_gp_factor"] * critic.gradient_penalty(x, x_hat, context)
+                if s["gaussian_similarity_penalty"] is not None:
+                    loss += s["gaussian_similarity_penalty"] * critic.gaussian_similarity(x_hat, context)
                 loss.backward()
                 opt_critic.step()
                 WD_train += WD.item()
@@ -485,7 +516,7 @@ def train(generator, critic, x, context, specifications):
                         "opt_critic_state_dict": opt_critic.state_dict()}, s["save_checkpoint"])
 
 
-def compare_dfs(df_real, df_fake, scatterplot=dict(x=[], y=[], samples=400),
+def compare_dfs(df_real, df_fake, scatterplot=dict(x=[], y=[], samples=400, smooth=0),
                 table_groupby=[], histogram=dict(variables=[], nrow=1, ncol=1),
                 figsize=3,save=False,path=""):
     """
@@ -570,6 +601,17 @@ def compare_dfs(df_real, df_fake, scatterplot=dict(x=[], y=[], samples=400),
                 s = s3.pop(0)
                 x_real, y_real = df_real_sample[x].to_numpy(),  df_real_sample[y].to_numpy()
                 x_fake, y_fake = df_fake_sample[x].to_numpy(), df_fake_sample[y].to_numpy()
+                from math import sqrt,pi
+                def fit(xx, yy):
+                    xx, yy = torch.tensor(xx).to(torch.float), torch.tensor(yy).to(torch.float)
+                    xx = (xx - xx.mean())/ xx.std()
+                    bw = 1e-9 + scatterplot["smooth"] # * (xx.max()-xx.min())
+                    dist = (xx.unsqueeze(0) - xx.unsqueeze(1)).pow(2)/bw
+                    kern = 1/sqrt(2*pi)*torch.exp(-dist**2/2)
+                    w = kern / kern.sum(1, keepdim=True)
+                    y_hat = w.mm(yy.unsqueeze(1)).squeeze()
+                    return y_hat.detach().numpy()
+                y_real, y_fake = fit(x_real, y_real), fit(x_fake, y_fake)
                 s.scatter(x_real, y_real, color="blue")
                 s.scatter(x_fake, y_fake, color="red")
                 s.set_ylabel(y)
