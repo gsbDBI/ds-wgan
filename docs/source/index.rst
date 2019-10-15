@@ -14,7 +14,7 @@ Source Code Documentation
    Generating Artificial Data <gendata>
 
 
-.. autoapimodule:: wgan_model
+.. autoapimodule:: wgan
    :members:
 
 
