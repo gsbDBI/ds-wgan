@@ -1,7 +1,8 @@
 """
-Created on Wed Aug 14 10:20:21 2019
+Module for training and generating data from conditional and joint distributions
+using WGANs.
 
-@author: Jonas Metzger and Evan Munro
+Author: Jonas Metzger and Evan Munro
 """
 
 import torch
@@ -395,7 +396,7 @@ class Critic(nn.Module):
         penalty = F.relu(gradients.norm(2, dim=1) - 1).mean()             # one-sided
         # penalty = (gradients.norm(2, dim=1) - 1).pow(2).mean()          # two-sided
         return penalty
-    
+
     def gaussian_similarity(self, x_hat, context, eps=1e-4):
         """
         Calculates similarity to the closest gaussian distribution
@@ -476,7 +477,7 @@ def train(generator, critic, x, context, specifications):
             if not generator_update:
                 critic_x = critic(x, context).mean()
                 WD = critic_x - critic_x_hat
-                loss = - WD 
+                loss = - WD
                 loss += s["critic_gp_factor"] * critic.gradient_penalty(x, x_hat, context)
                 if s["gaussian_similarity_penalty"] is not None:
                     loss += s["gaussian_similarity_penalty"] * critic.gaussian_similarity(x_hat, context)
@@ -517,7 +518,7 @@ def train(generator, critic, x, context, specifications):
 
 def compare_dfs(df_real, df_fake, scatterplot=dict(x=[], y=[], samples=400, smooth=0),
                 table_groupby=[], histogram=dict(variables=[], nrow=1, ncol=1),
-                figsize=3):
+                figsize=3,save=False,path=""):
     """
     Diagnostic function for comparing real and generated data from WGAN models.
     Prints out comparison of means, comparisons of standard deviations, and histograms
@@ -536,7 +537,10 @@ def compare_dfs(df_real, df_fake, scatterplot=dict(x=[], y=[], samples=400, smoo
     histogram: dict
         Contains specifications for plotting histograms comparing marginal densities
         of real and fake data
-
+    save: bool
+        Indicate whether to save results to file or print them
+    path: string
+        Path to save diagnostics for model
     """
     # data prep
     if "source" in list(df_real.columns): df_real = df_real.drop("source", axis=1)
@@ -547,12 +551,21 @@ def compare_dfs(df_real, df_fake, scatterplot=dict(x=[], y=[], samples=400, smoo
     df_real, df_fake = df_real.drop("source", axis=1), df_fake.drop("source", axis=1)
     common_cols = [c for c in df_real.columns if c in df_fake.columns]
     # mean and std table
-    print("-------------comparison of means-------------")
+
     means = df_joined.groupby(table_groupby + ["source"]).mean().round(2).transpose()
-    print(means)
-    print("-------------comparison of stds-------------")
+    if save:
+        means.to_csv(path+"_means.txt",sep=" ")
+    else:
+        print("-------------comparison of means-------------")
+        print(means)
+
     stds = df_joined.groupby(table_groupby + ["source"]).std().round(2).transpose()
-    print(stds)
+
+    if save:
+        stds.to_csv(path+"_stds.txt",sep=" ")
+    else:
+        print("-------------comparison of stds-------------")
+        print(stds)
     # covariance matrix comparison
     fig1 = plt.figure(figsize=(figsize * 2, figsize * 1))
     s1 = [fig1.add_subplot(1, 2, i) for i in range(1, 3)]
@@ -572,7 +585,10 @@ def compare_dfs(df_real, df_fake, scatterplot=dict(x=[], y=[], samples=400, smoo
                                   histtype='bar', label=["real", "fake"], color=["blue", "red"])
                 axarr2[i][j].legend(prop={"size": 10})
                 axarr2[i][j].set_title(plot_var)
-        fig2.show()
+        if save:
+            fig2.savefig(path+'_hist.png')
+        else:
+            fig2.show()
     # scatterplot grid
     if scatterplot and len(scatterplot["x"]) * len(scatterplot["y"]) > 0:
         df_real_sample = df_real.sample(scatterplot["samples"])
@@ -600,4 +616,8 @@ def compare_dfs(df_real, df_fake, scatterplot=dict(x=[], y=[], samples=400, smoo
                 s.scatter(x_fake, y_fake, color="red")
                 s.set_ylabel(y)
                 s.set_xlabel(x)
-        fig3.show()
+
+        if save:
+            fig3.savefig(path+'_scatter.png')
+        else:
+            fig3.show()
