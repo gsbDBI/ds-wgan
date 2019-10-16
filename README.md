@@ -1,6 +1,6 @@
 ### Guide to Simulating Economic Datasets using WGANs
 
-This repository contains wgan_model, a python module built on PyTorch for using WGANs to simulate from joint and conditional distributions of economic datasets. 
+This repository contains `wgan`, a python module built on PyTorch for using WGANs to simulate from joint and conditional distributions of economic datasets. 
 
 This [Google Colab Notebook](https://colab.research.google.com/drive/1AYvY4ZpCeHjEWLte39CFTs6_KgwRP-N6#scrollTo=NEX_jqVFFwS5) contains a tutorial for the code, including how to install requirements, and estimate and simulate from the resulting models, using a free Google GPU. The tutorial simulates from the Lalonde-Dehejia-Wahba dataset, as described in detail in the following paper. 
 
@@ -14,13 +14,13 @@ The data folder contains the raw Lalonde-Dehejia-Wahba data.
 
 For running the WGAN code outside of a Google Colab environment an installation of [python3](https://www.python.org/downloads/) is required. 
 
-First, clone our repository. 
+In order to install this package and its dependencies, please follows the instructions below.
+
 ``` 
-git clone https://www.github.com/gsbDBI/ds-wgan 
+git clone https://www.github.com/gsbDBI/ds-wgan
+cd ds-wgan
+python setup.py develop 
 ``` 
 
-Then, in the ds-wgan folder, run 
-``` 
-pip install -r requirements.txt 
-```
+
 
