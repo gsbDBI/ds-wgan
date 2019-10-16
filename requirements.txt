@@ -1,10 +1,1 @@
-numpy
-torch>=1.1.0 
-tqdm 
-tensorboardX>=1.8 
-tensorboard>=2.0.0
-pandas
-matplotlib
-scipy
-git+https://github.com/gbaydin/hypergradient-descent.git
-pyarrow>=0.14 
+.
