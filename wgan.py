@@ -1,8 +1,10 @@
 """
+TITLE
 Module for training and generating data from conditional and joint distributions
 using WGANs.
 
 Author: Jonas Metzger and Evan Munro
+TITLE
 """
 
 import torch
