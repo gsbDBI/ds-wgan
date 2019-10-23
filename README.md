@@ -14,12 +14,18 @@ The data folder contains the raw Lalonde-Dehejia-Wahba data.
 
 For running the WGAN code outside of a Google Colab environment an installation of [python3](https://www.python.org/downloads/) is required. 
 
-In order to install this package and its dependencies, please follows the instructions below.
+In order to install this package dependencies, please use requirements.txt: 
 
 ``` 
 git clone https://www.github.com/gsbDBI/ds-wgan
 cd ds-wgan
-python setup.py develop 
+pip install -r requirements.txt 
+``` 
+
+In addition, in order to install the package itself, you can run: 
+
+```
+python setup.py develop
 ``` 
 
 
