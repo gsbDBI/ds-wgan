@@ -27,20 +27,20 @@ The function `DataWrapper` prepares the data.
     data_wrappers = wgan.DataWrapper(df, continuous_vars, categorical_vars,
                                   context_vars, continuous_lower_bound)
 
-`Specifications` sets up the training specifications before training the `Generator` and `Critic`.
+`Specifications` sets up the training specifications before training the `Generator` and `Critic`. It includes all the tuning parameters for the training process. 
 
 .. code-block:: python
 
     specs = wgan.Specifications(dw, batch_size=2048, max_epochs=epochs, critic_lr=1e-3, generator_lr=1e-3,
                                print_every=50, device = "cuda") for dw, epochs in zip(data_wrappers, [600, 600])
 
-`Generator` generates new observations based on the distributions in the original data set in the WGAN setup. The underlying function is a dense neural network.
+`Generator` is the generator network. generates new observations based on the distributions in the original data set in the WGAN setup. The underlying function is a dense neural network.
 
 .. code-block:: python
 
     generators = wgan.Generator(specs)
 
-`Critic` is the discriminator in the WGAN setup. The underlying function is a dense neural network.
+`Critic` is the critic network to be trained. the discriminator in the WGAN setup. The underlying function is a dense neural network.
 
 .. code-block:: python
 

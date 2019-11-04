@@ -9,6 +9,7 @@ DataWrapper
 ^^^^^^^^^^^
 .. autoapimodule:: wgan
   :members: DataWrapper
+  :exclude-members: apply_critic
 
 .. _specifications:
 
@@ -23,6 +24,7 @@ Generator
 ^^^^^^^^^
 .. autoapimodule:: wgan
   :members: Generator
+  :exclude-members: forward
 
 .. _critic:
 
@@ -30,6 +32,7 @@ Critic
 ^^^^^^
 .. autoapimodule:: wgan
   :members: Critic
+  :exclude-members: forward, gradient_penalty, gaussian_similarity, layers, dropout
 
 .. _train:
 

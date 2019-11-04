@@ -7,23 +7,23 @@ The workflow for the fitting of a distribution is the following:
 
 #. :ref:`section_data`
 
-  + Load and prepare data
-  + Initialize a :ref:`data_wrapper` object, which takes care of handling the data
-  + Initialize :ref:`specifications` object given the :ref:`data_wrapper`, which summarizes hyperparameters, etc.
-  + Initialize :ref:`generator` & :ref:`critic` given the :ref:`specifications`
-  + Preprocess the data with the :ref:`data_wrapper` object
+    +   Load and prepare data
+    +   Initialize a :ref:`data_wrapper` object, which takes care of handling the data
+    +   Initialize :ref:`specifications` object given the :ref:`data_wrapper`, which summarizes hyperparameters, etc.
+    +   Initialize :ref:`generator` & :ref:`critic` given the :ref:`specifications`
+    +   Preprocess the data with the :ref:`data_wrapper` object
 
 #. :ref:`section_train`:
 
-  + Train the :ref:`generator` & :ref:`critic` via :ref:`train`
+    +   Train the :ref:`generator` & :ref:`critic` via :ref:`train`
 
 #. :ref:`section_gendata`
 
-  + Replace columns in df with simulated data from :ref:`generator` using `DataWrapper.apply_generator`
+    +   Replace columns in df with simulated data from :ref:`generator` using `DataWrapper.apply_generator`
 
 #. :ref:`section_train`:
 
-  + Explore the data via :ref:`compare_dfs` and save the new data.
+    +   Explore the data via :ref:`compare_dfs` and save the new data.
 
 Additional resources:
 

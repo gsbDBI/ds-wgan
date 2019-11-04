@@ -3,6 +3,8 @@
 Evaluating Models
 =================
 
+The function `compare_dfs` compares real and generated data from the WGANs. The output are a comparison of means, comparisons of standard deviations, histograms and scatterplots.
+
   .. code-block:: python
 
     wgan.compare_dfs(df, df_generated,
