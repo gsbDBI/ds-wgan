@@ -32,7 +32,7 @@ release = '0.1'
 # ones.
 extensions = ['sphinx.ext.autodoc', 'autoapi.extension','sphinx_rtd_theme', 'sphinx.ext.napoleon'
 ]
-
+html_show_sourcelink = False
 autoapi_dirs=['../../']
 
 master_doc='index'
