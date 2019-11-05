@@ -68,4 +68,5 @@ def setup(app):
     # Register a sphinx.ext.autodoc.between listener to ignore everything
     # between lines that contain the word TITLE
     app.connect('autodoc-process-docstring', between('^.*TITLE.*$', exclude=True))
+    app.connect('autodoc-process-docstring', between('^.*ATTRIBUTES.*$', exclude=True))
     return app
