@@ -20,31 +20,50 @@ We need to categorize the variables in `df` in the following way:
     categorical_vars = ["categorical_var"]
     context_vars = ["context_var"]
 
-The function `DataWrapper` prepares the data.
+`DataWrapper` prepares the data in `df` in several ways. The attributes of the resulting object `data_wrappers` are the following:
+
++ list of variable names categorized above
++ list of means and standard deviations of continuous and context variables
++ list of dimensions of categorical variables
++ formatted lower bounds of continuous variables
 
   .. code-block:: python
 
     data_wrappers = wgan.DataWrapper(df, continuous_vars, categorical_vars,
                                   context_vars, continuous_lower_bound)
 
-`Specifications` sets up the training specifications before training the `Generator` and `Critic`. It includes all the tuning parameters for the training process. 
+
+`Specifications` sets up the training specifications based on `data_wrappers` before training the `Generator` and `Critic`. The resulting object `specs` includes all the tuning parameters for the training process and its attributes are the following:
+
++ neural-network-related settings for training
++ settings related to the data dimensions and bounds
+
 
 .. code-block:: python
 
-    specs = wgan.Specifications(dw, batch_size=2048, max_epochs=epochs, critic_lr=1e-3, generator_lr=1e-3,
-                               print_every=50, device = "cuda") for dw, epochs in zip(data_wrappers, [600, 600])
+    specs = wgan.Specifications(data_wrappers, batch_size=2048, max_epochs=600, critic_lr=1e-3, generator_lr=1e-3,
+                               print_every=50, device = "cuda")
 
-`Generator` is the generator network. generates new observations based on the distributions in the original data set in the WGAN setup. The underlying function is a dense neural network.
+`Generator` is the generator in the WGAN setup and generates new observations based on the distributions in the data set `df`. The underlying function is a dense neural network. The only input required are the specifications `specs`.
+The attributes of the resuting object `generators` are the following:
+
++ the formatted bounds of the continuous variables
++ the dimensions of each categorical variable
++ the total dimension of continuous variables
++ the total dimension of categorical variables
++ the dimension of noise input to generator
++ the dense neural network layers making up the generator
++ the dropout layer based on the specifications
 
 .. code-block:: python
 
     generators = wgan.Generator(specs)
 
-`Critic` is the critic network to be trained. the discriminator in the WGAN setup. The underlying function is a dense neural network.
+`Critic` is the discriminator in the WGAN setup and classifies observations as coming from `df` rather than from `Generator`. The underlying function is a dense neural network.
 
 .. code-block:: python
 
     critics = wgan.Critic(specs)
 
 
-See the classes :ref:`data_wrapper`, :ref:`specifications`, :ref:`generator`, :ref:`critic` in Section :ref:`section_api` for more details on the code.
+See the classes :ref:`data_wrapper`, :ref:`specifications`, :ref:`generator`, :ref:`critic` in Section :ref:`section_api` for more details on the code and the required parameters.
