@@ -38,7 +38,7 @@ class DataWrapper(object):
         Key is element of continuous_vars, value is upper limit on that variable.
 
 
-    ATTRIBUTES    
+    ATTRIBUTES
     Attributes
     ----------
     variables: dict
@@ -51,7 +51,7 @@ class DataWrapper(object):
         List of dimension of each categorical variable
     cont_bounds: torch.tensor
         formatted lower and upper bounds of continuous variables
-    ATTRIBUTES
+    ATTRIBUTES    
     """
     def __init__(self, df, continuous_vars=[], categorical_vars=[], context_vars=[],
                  continuous_lower_bounds = dict(), continuous_upper_bounds = dict()):
