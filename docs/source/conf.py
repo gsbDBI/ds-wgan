@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'wgan_model'
+project = 'wgan'
 copyright = '2019, Evan Munro and Jonas Metzger'
 author = 'Evan Munro and Jonas Metzger'
 

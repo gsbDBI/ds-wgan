@@ -3,7 +3,9 @@
 Evaluating Models
 =================
 
-The function ``compare_dfs`` compares the real data set ``df`` and the artificially generated data set ``df_generated`` from the WGANs. The output are a comparison of means, comparisons of standard deviations, histograms and scatterplots to evaluate the performance of the WGAN.
+The function :ref:`compare_dfs` compares the real data set ``df`` and the artificially generated data set ``df_generated`` from the WGANs.
+The output includes a comparison of means and standard deviations, histograms and scatterplots to evaluate how well the generated data
+matches the individual data.
 
   .. code-block:: python
 
@@ -15,10 +17,11 @@ The function ``compare_dfs`` compares the real data set ``df`` and the artificia
                  nrow=2, ncol=2),
                  figsize=3)
 
-Find below an example of the output of :ref:`compare_dfs` from `Athey et al. [2019] <https://arxiv.org/abs/1909.02210>`_.
+Find below an example of a histogram produced by :ref:`compare_dfs`, from `Athey et al. [2019] <https://arxiv.org/abs/1909.02210>`_.
 
   .. image:: exp_marg3.png
 
-  The figure shows the histograms for CPS data, Earnings 1975, education and age (Figure 3 in the paper). ``Real`` refers to the distribution of the variable in the original data set ``df`` and ``fake`` refers to the distribution of the same variable in the artificially generated data set ``df_generated``.
+  The figure shows the histograms for CPS data, Earnings 1975, education and age (Figure 3 in the paper). `real` refers to the distribution of the variable in the original data set ``df``
+  and `fake` refers to the distribution of the same variable in the artificially generated data set ``df_generated``.
 
-See the function :ref:`compare_dfs` in the section :ref:`section_api` for more details on the code and the required parameters.
+See the function :ref:`compare_dfs` in the :ref:`section_api` for more details.
