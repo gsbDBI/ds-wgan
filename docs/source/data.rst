@@ -28,13 +28,13 @@ and ``categorical_vars`` must be non-empty when setting up a :ref:`data_wrapper`
     data_wrapper = wgan.DataWrapper(df, continuous_vars, categorical_vars,
                                   context_vars, continuous_lower_bound)
 
-Before the training of the :ref:`generator` and :ref:`critic`, ``df`` is scaled using the function ``preprocess``.
+:ref:`data_wrapper` prepares the data in ``df``. Before the training of the :ref:`generator` and :ref:`critic`, ``df`` is scaled using the function :ref:`preprocess <data_wrapper>`. After the training procedure, ``df`` is rescaled to the original data set.
 
   .. code-block:: python
 
     x, context = data_wrapper.preprocess(df)
 
-If ```context_vars`` is an empty list, then ``preprocess`` will return an empty ``context``.
+If ``context_vars`` is an empty list, then :ref:`preprocess <data_wrapper>` will return an empty ``context``.
 :ref:`specifications` specifies the tuning parameters for the training process based on a :ref:`data_wrapper`
 before training the :ref:`generator` and :ref:`critic`.
 The resulting object ``specs`` includes all the tuning parameters for the training process.

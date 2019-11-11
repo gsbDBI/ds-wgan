@@ -3,9 +3,7 @@
 Evaluating Models
 =================
 
-The function :ref:`compare_dfs` compares the real data set ``df`` and the artificially generated data set ``df_generated`` from the WGANs.
-The output includes a comparison of means and standard deviations, histograms and scatterplots to evaluate how well the generated data
-matches the individual data.
+The function :ref:`compare_dfs` compares the real data set ``df`` and the artificially generated data set ``df_generated`` from the WGANs. The output are a comparison of means, comparisons of standard deviations, histograms and scatterplots to evaluate the performance of the WGAN.
 
   .. code-block:: python
 
