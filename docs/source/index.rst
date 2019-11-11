@@ -1,8 +1,4 @@
 
-
-Source Code Documentation
-========================================
-
 .. toctree::
    :hidden:
    :maxdepth: 2
@@ -12,8 +8,6 @@ Source Code Documentation
    Training Models and Generating Artificial Data <train>
    Evaluating Models <evaluate>
    API <api>
-
-.. _section_intro:
 
 Introduction
 ============================
@@ -54,10 +48,3 @@ The workflow for fitting a distribution and generating data from it using the mo
 
 For bug reports and feature requests, please submit an issue in the `Github repository <https://github.com/gsbDBI/ds-wgan>`_. The repository
 also contains a Google Colab tutorial that can be accessed `here <https://colab.research.google.com/drive/1AYvY4ZpCeHjEWLte39CFTs6_KgwRP-N6#scrollTo=NEX_jqVFFwS5>`_
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
