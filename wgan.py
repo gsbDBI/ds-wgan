@@ -1,8 +1,10 @@
 """
+TITLE
 Module for training and generating data from conditional and joint distributions
 using WGANs.
 
 Author: Jonas Metzger and Evan Munro
+TITLE
 """
 
 import torch
@@ -35,6 +37,8 @@ class DataWrapper(object):
     continuous_upper_bounds: dict
         Key is element of continuous_vars, value is upper limit on that variable.
 
+
+    ATTRIBUTES
     Attributes
     ----------
     variables: dict
@@ -47,6 +51,7 @@ class DataWrapper(object):
         List of dimension of each categorical variable
     cont_bounds: torch.tensor
         formatted lower and upper bounds of continuous variables
+    ATTRIBUTES    
     """
     def __init__(self, df, continuous_vars=[], categorical_vars=[], context_vars=[],
                  continuous_lower_bounds = dict(), continuous_upper_bounds = dict()):
@@ -214,12 +219,14 @@ class Specifications(object):
     device: str
         Either "cuda" if GPU is available or "cpu" if not
 
+    ATTRIBUTES
     Attributes
     ----------
     settings: dict
         Contains the neural network-related settings for training
     data: dict
         Contains settings related to the data dimension and bounds
+    ATTRIBUTES                                                
     """
     def __init__(self, data_wrapper,
                  critic_d_hidden = [128,128,128],
@@ -266,6 +273,7 @@ class Generator(nn.Module):
     specifications: wgan_model.Specifications
         parameters for training WGAN
 
+    ATTRIBUTES
     Attributes
     ----------
     cont_bounds: torch.tensor
@@ -282,7 +290,7 @@ class Generator(nn.Module):
         Dense neural network layers making up the generator
     dropout: torch.nn.Dropout
         Dropout layer based on specifications
-
+    ATTRIBUTES
     """
     def __init__(self, specifications):
         super().__init__()
@@ -335,12 +343,14 @@ class Critic(nn.Module):
     ----------
     specifications: wgan_model.Specifications
 
+    ATTRIBUTES
     Attributes
     ----------
     layers: torch.nn.ModuleList
         Dense neural network making up the critic
     dropout: torch.nn.Dropout
         Dropout layer applied between each of hidden layers
+    ATTRIBUTES        
     """
     def __init__(self, specifications):
         super().__init__()

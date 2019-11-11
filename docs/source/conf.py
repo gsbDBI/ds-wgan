@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'wgan_model'
+project = 'wgan'
 copyright = '2019, Evan Munro and Jonas Metzger'
 author = 'Evan Munro and Jonas Metzger'
 
@@ -32,7 +32,7 @@ release = '0.1'
 # ones.
 extensions = ['sphinx.ext.autodoc', 'autoapi.extension','sphinx_rtd_theme', 'sphinx.ext.napoleon'
 ]
-
+html_show_sourcelink = False
 autoapi_dirs=['../../']
 
 master_doc='index'
@@ -60,3 +60,13 @@ html_theme = 'sphinx_rtd_theme'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+
+from sphinx.ext.autodoc import between
+
+def setup(app):
+    # Register a sphinx.ext.autodoc.between listener to ignore everything
+    # between lines that contain the word TITLE
+    app.connect('autodoc-process-docstring', between('^.*TITLE.*$', exclude=True))
+    app.connect('autodoc-process-docstring', between('^.*ATTRIBUTES.*$', exclude=True))
+    return app
