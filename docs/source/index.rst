@@ -8,7 +8,7 @@ Source Code Documentation
    :maxdepth: 2
    :caption: Contents:
 
-   Setting Up Data <data>
+   Setting Up Data and Models <data>
    Training Models and Generating Artificial Data <train>
    Evaluating Models <evaluate>
    API <api>
@@ -38,15 +38,15 @@ The workflow for fitting a distribution and generating data from it using the mo
     +   Initialize :ref:`specifications` object given the :ref:`data_wrapper`, which specifies hyperparameters for training
     +   Initialize :ref:`generator` (generator) & :ref:`critic` (discriminator) given the :ref:`specifications`
     +   Normalize the data with the :ref:`data_wrapper` object
-    |
+
 #. :ref:`section_train`:
 
     +   Train the :ref:`generator` & :ref:`critic` via :ref:`train`
-    |
+
 #. :ref:`section_gendata`
 
     +   Replace columns in df with simulated data from :ref:`generator` using :ref:`DataWrapper.apply_generator <data_wrapper>`
-    |
+
 #. :ref:`section_evaluate`:
 
     +   Check the generated data via :ref:`compare_dfs`

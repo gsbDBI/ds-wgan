@@ -28,7 +28,8 @@ and ``categorical_vars`` must be non-empty when setting up a :ref:`data_wrapper`
     data_wrapper = wgan.DataWrapper(df, continuous_vars, categorical_vars,
                                   context_vars, continuous_lower_bound)
 
-:ref:`data_wrapper` prepares the data in ``df``. Before the training of the :ref:`generator` and :ref:`critic`, ``df`` is scaled using the function :ref:`preprocess <data_wrapper>`. After the training procedure, ``df`` is rescaled to the original data set.
+:ref:`data_wrapper` prepares the data in ``df``. Before the training of the :ref:`generator` and :ref:`critic`, ``df`` is scaled using the function :ref:`preprocess <data_wrapper>`.
+After the training procedure, generated data is rescaled to the original data set.
 
   .. code-block:: python
 
@@ -57,7 +58,7 @@ with `N` observations and `p` covariates:
 
     generator = wgan.Generator(specs)
 
-:ref:`critic` is the discriminator in the WGAN setup and classifies observations as coming from ``df`` rather than from :ref:`generator`. The underlying function is a dense neural network.
+:ref:`critic` is the discriminator in the WGAN setup and classifies observations as coming from ``df`` rather than from the :ref:`generator`. The underlying function is a dense neural network.
 
 .. code-block:: python
 
