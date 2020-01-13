@@ -49,6 +49,8 @@ class DataWrapper(object):
         List of float of standard deviation of continuous and context variables
     cat_dims: list
         List of dimension of each categorical variable
+    cat_labels: list
+        List of labels of each categorical variable
     cont_bounds: torch.tensor
         formatted lower and upper bounds of continuous variables
     ATTRIBUTES    
@@ -63,6 +65,7 @@ class DataWrapper(object):
         self.means = [x.mean(0, keepdim=True) for x in (continuous, context)]
         self.stds  = [x.std(0,  keepdim=True) + 1e-5 for x in (continuous, context)]
         self.cat_dims = [df[v].nunique() for v in variables["categorical"]]
+        self.cat_labels = [torch.tensor(pd.get_dummies(df[v]).columns.to_numpy()).to(torch.float) for v in variables["categorical"]]
         self.cont_bounds = [[continuous_lower_bounds[v] if v in continuous_lower_bounds.keys() else -1e8 for v in variables["continuous"]],
                             [continuous_upper_bounds[v] if v in continuous_upper_bounds.keys() else 1e8 for v in variables["continuous"]]]
         self.cont_bounds = (torch.tensor(self.cont_bounds).to(torch.float) - self.means[0]) / self.stds[0]
@@ -110,9 +113,10 @@ class DataWrapper(object):
         """
         continuous, categorical = x.split((self.means[0].size(-1), sum(self.cat_dims)), -1)
         continuous, context = [x*s+m for x,m,s in zip([continuous, context], self.means, self.stds)]
-        if categorical.size(-1) > 0: categorical = torch.cat([torch.multinomial(p, 1) for p in categorical.split(self.cat_dims, -1)], -1)
+        if categorical.size(-1) > 0:
+            categorical = torch.cat([l[torch.multinomial(p, 1)] for p, l in zip(categorical.split(self.cat_dims, -1), self.cat_labels)], -1)
         df = pd.DataFrame(dict(zip(self.variables["continuous"] + self.variables["categorical"] + self.variables["context"],
-                                   torch.cat([continuous, categorical.to(torch.float), context], -1).detach().t())))
+                                   torch.cat([continuous, categorical, context], -1).detach().t())))
         return df
 
     def apply_generator(self, generator, df):
@@ -307,12 +311,12 @@ class Generator(nn.Module):
 
     def _transform(self, hidden):
         continuous, categorical = hidden.split([self.d_cont, self.d_cat], -1)
-        # apply bounds to continuous
-        bounds = self.cont_bounds.to(hidden.device)
-        continuous = torch.stack([continuous, bounds[0:1].expand_as(continuous)]).max(0).values
-        continuous = torch.stack([continuous, bounds[1:2].expand_as(continuous)]).min(0).values
-        # renormalize categorical
-        if categorical.size(-1) > 0: categorical = torch.cat([F.softmax(x, -1) for x in categorical.split(self.cat_dims, -1)], -1)
+        if continuous.size(-1) > 0: # apply bounds to continuous
+            bounds = self.cont_bounds.to(hidden.device)
+            continuous = torch.stack([continuous, bounds[0:1].expand_as(continuous)]).max(0).values
+            continuous = torch.stack([continuous, bounds[1:2].expand_as(continuous)]).min(0).values
+        if categorical.size(-1) > 0: # renormalize categorical
+            categorical = torch.cat([F.softmax(x, -1) for x in categorical.split(self.cat_dims, -1)], -1)
         return torch.cat([continuous, categorical], -1)
 
     def forward(self, context):
