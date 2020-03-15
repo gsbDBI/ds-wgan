@@ -53,7 +53,7 @@ class DataWrapper(object):
         List of labels of each categorical variable
     cont_bounds: torch.tensor
         formatted lower and upper bounds of continuous variables
-    ATTRIBUTES    
+    ATTRIBUTES
     """
     def __init__(self, df, continuous_vars=[], categorical_vars=[], context_vars=[],
                  continuous_lower_bounds = dict(), continuous_upper_bounds = dict()):
@@ -230,7 +230,7 @@ class Specifications(object):
         Contains the neural network-related settings for training
     data: dict
         Contains settings related to the data dimension and bounds
-    ATTRIBUTES                                                
+    ATTRIBUTES
     """
     def __init__(self, data_wrapper,
                  critic_d_hidden = [128,128,128],
@@ -354,7 +354,7 @@ class Critic(nn.Module):
         Dense neural network making up the critic
     dropout: torch.nn.Dropout
         Dropout layer applied between each of hidden layers
-    ATTRIBUTES        
+    ATTRIBUTES
     """
     def __init__(self, specifications):
         super().__init__()
@@ -401,7 +401,7 @@ class Critic(nn.Module):
         -------
         torch.tensor
         """
-        alpha = torch.randn(x.size(0)).unsqueeze(1).to(x.device)
+        alpha = torch.rand(x.size(0)).unsqueeze(1).to(x.device)
         interpolated = x * alpha + x_hat * (1 - alpha)
         interpolated = torch.autograd.Variable(interpolated.detach(), requires_grad=True)
         critic = self(interpolated, context)
