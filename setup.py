@@ -12,7 +12,7 @@ with open(join(here, 'README.md')) as f:
 #     lic = f.read()
 
 setup(name='wgan',
-      version='0.1',
+      version='0.2',
       description='wgan',
       author='Jonas Metzger and Evan Munro',
       long_description=readme,
@@ -22,13 +22,9 @@ setup(name='wgan',
       install_requires=[
           "numpy",
           "torch>=1.1.0",
-          "tqdm",
-          "tensorboardX>=1.8",
-          "tensorboard>=2.0.0",
           "pandas",
           "matplotlib",
-          "scipy",
-          "pyarrow>=0.14",
+          "scipy"
       ],
       classifiers=[
           'Development Status :: 3 - Alpha',
