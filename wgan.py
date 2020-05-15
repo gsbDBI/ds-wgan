@@ -14,7 +14,6 @@ from torch.utils import data as D
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from hypergrad import AdamHD
 from time import time
 
 
@@ -203,8 +202,8 @@ class Specifications(object):
     gaussian_similarity_penalty: float
         Positive values incentivize dissimilarity of the unconditional generator
         distribution to the 'closest' multivariate Gaussian distribution
-    optimizer: str
-        The optimizer used for training the neural networks.
+    optimizer: torch.optim.Optimizer
+        The torch.optim.Optimizer object used for training the neural networks, per default torch.optim.Adam.
     max_epochs: int
         The number of times to train the network on the whole dataset.
     batch_size: int
@@ -243,7 +242,7 @@ class Specifications(object):
                  generator_lr = 1e-4,
                  generator_d_noise = "generator_d_output",
                  gaussian_similarity_penalty = None,
-                 optimizer = "AdamHD",
+                 optimizer = torch.optim.Adam,
                  max_epochs = 1000,
                  batch_size = 32,
                  test_set_size = 16,
@@ -457,7 +456,7 @@ def train(generator, critic, x, context, specifications):
     s = specifications.settings
     start_epoch, step, description, device, t = 0, 1, "", s["device"], time()
     generator.to(device), critic.to(device)
-    opt = {"AdamHD": AdamHD, "Adam": torch.optim.Adam}[s["optimizer"]]
+    opt = s["optimizer"]
     opt_generator = opt(generator.parameters(), lr=s["generator_lr"])
     opt_critic = opt(critic.parameters(), lr=s["critic_lr"])
     train_batches, test_batches = D.random_split(D.TensorDataset(x, context), (x.size(0)-s["test_set_size"], s["test_set_size"]))
