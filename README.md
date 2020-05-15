@@ -16,5 +16,5 @@ For running the WGAN code outside of a Google Colab environment an installation 
 
 In order to install the package and dependencies from Github, use pip:
 ```
-pip install git+https://github.com/gsbDBI/ds-wgan.git#egg=wgan/
+pip install git+https://github.com/gsbDBI/ds-wgan.git#egg=wgan
 ```
