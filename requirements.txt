@@ -3,5 +3,4 @@ torch>=1.1.0
 pandas
 matplotlib
 scipy
-git+https://github.com/gbaydin/hypergradient-descent.git
 pyarrow>=0.14
