@@ -1,1 +1,1 @@
-from wgan import * 
+from .wgan import * 
