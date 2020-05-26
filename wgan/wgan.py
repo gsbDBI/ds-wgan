@@ -654,7 +654,7 @@ def monotonicity_penalty_chetverikov(x_hat, context, idx_out=4, idx_in=3):
   y, x = y[argsort], x[argsort]
   sigma = (y[:-1] - y[1:]).pow(2)
   sigma = torch.cat([sigma, sigma[-1:]])
-  k = lambda x: 0.75*(1-x.pow(2))
+  k = lambda x: 0.75*F.relu(1-x.pow(2))
   h_max = (x.max()-x.min())/2
   n = y.size(0)
   h_min = 0.4*h_max*(np.log(n)/n)**(1/3)
