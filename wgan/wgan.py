@@ -445,62 +445,65 @@ def train(generator, critic, x, context, specifications, penalty=None):
         opt_critic.load_state_dict(cp["opt_critic_state_dict"])
         start_epoch, step = cp["epoch"], cp["step"]
     # start training
-    for epoch in range(start_epoch, s["max_epochs"]):
-        # train loop
-        WD_train, n_batches = 0, 0
-        for x, context in train_batches:
-            x, context = x.to(device), context.to(device)
-            generator_update = step % s["critic_steps"] == 0
-            for par in critic.parameters():
-                par.requires_grad = not generator_update
-            for par in generator.parameters():
-                par.requires_grad = generator_update
-            if generator_update:
-                generator.zero_grad()
-            else:
-                critic.zero_grad()
-            x_hat = generator(context)
-            critic_x_hat = critic(x_hat, context).mean()
-            if not generator_update:
-                critic_x = critic(x, context).mean()
-                WD = critic_x - critic_x_hat
-                loss = - WD
-                loss += s["critic_gp_factor"] * critic.gradient_penalty(x, x_hat, context)
-                if penalty is not None:
-                    loss += penalty(x_hat, context)
-                loss.backward()
-                opt_critic.step()
-                WD_train += WD.item()
-                n_batches += 1
-            else:
-                loss = - critic_x_hat
-                loss.backward()
-                opt_generator.step()
-            step += 1
-        WD_train /= n_batches
-        # test loop
-        WD_test, n_batches = 0, 0
-        for x, context in test_batches:
-            x, context = x.to(device), context.to(device)
-            with torch.no_grad():
+    try:
+        for epoch in range(start_epoch, s["max_epochs"]):
+            # train loop
+            WD_train, n_batches = 0, 0
+            for x, context in train_batches:
+                x, context = x.to(device), context.to(device)
+                generator_update = step % s["critic_steps"] == 0
+                for par in critic.parameters():
+                    par.requires_grad = not generator_update
+                for par in generator.parameters():
+                    par.requires_grad = generator_update
+                if generator_update:
+                    generator.zero_grad()
+                else:
+                    critic.zero_grad()
                 x_hat = generator(context)
                 critic_x_hat = critic(x_hat, context).mean()
-                critic_x = critic(x, context).mean()
-                WD_test += (critic_x - critic_x_hat).item()
-                n_batches += 1
-        WD_test /= n_batches
-        # diagnostics
-        if epoch % s["print_every"] == 0:
-            description = "epoch {} | step {} | WD_test {} | WD_train {} | sec passed {} |".format(
-            epoch, step, round(WD_test, 2), round(WD_train, 2), round(time() - t))
-            print(description)
-            t = time()
-        if s["save_checkpoint"] and epoch % s["save_every"] == 0:
-            torch.save({"epoch": epoch, "step": step,
-                        "generator_state_dict": generator.state_dict(),
-                        "critic_state_dict": critic.state_dict(),
-                        "opt_generator_state_dict": opt_generator.state_dict(),
-                        "opt_critic_state_dict": opt_critic.state_dict()}, s["save_checkpoint"])
+                if not generator_update:
+                    critic_x = critic(x, context).mean()
+                    WD = critic_x - critic_x_hat
+                    loss = - WD
+                    loss += s["critic_gp_factor"] * critic.gradient_penalty(x, x_hat, context)
+                    if penalty is not None:
+                        loss += penalty(x_hat, context)
+                    loss.backward()
+                    opt_critic.step()
+                    WD_train += WD.item()
+                    n_batches += 1
+                else:
+                    loss = - critic_x_hat
+                    loss.backward()
+                    opt_generator.step()
+                step += 1
+            WD_train /= n_batches
+            # test loop
+            WD_test, n_batches = 0, 0
+            for x, context in test_batches:
+                x, context = x.to(device), context.to(device)
+                with torch.no_grad():
+                    x_hat = generator(context)
+                    critic_x_hat = critic(x_hat, context).mean()
+                    critic_x = critic(x, context).mean()
+                    WD_test += (critic_x - critic_x_hat).item()
+                    n_batches += 1
+            WD_test /= n_batches
+            # diagnostics
+            if epoch % s["print_every"] == 0:
+                description = "epoch {} | step {} | WD_test {} | WD_train {} | sec passed {} |".format(
+                epoch, step, round(WD_test, 2), round(WD_train, 2), round(time() - t))
+                print(description)
+                t = time()
+            if s["save_checkpoint"] and epoch % s["save_every"] == 0:
+                torch.save({"epoch": epoch, "step": step,
+                            "generator_state_dict": generator.state_dict(),
+                            "critic_state_dict": critic.state_dict(),
+                            "opt_generator_state_dict": opt_generator.state_dict(),
+                            "opt_critic_state_dict": opt_critic.state_dict()}, s["save_checkpoint"])
+    except KeyboardInterrupt:
+        print("exited gracefully.")
 
 
 def compare_dfs(df_real, df_fake, scatterplot=dict(x=[], y=[], samples=400, smooth=0),
