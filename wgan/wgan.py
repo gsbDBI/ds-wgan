@@ -632,6 +632,7 @@ def gaussian_similarity_penalty(x_hat, context, eps=1e-4):
     loglik = gaussian.log_prob(x).mean()
     return loglik  
 
+
 def monotonicity_penalty_chetvernikov(x_hat, context, idx_out=4, idx_in=3):
   """
   Adds Chetverikov monotonicity test penalty.
@@ -649,6 +650,10 @@ def monotonicity_penalty_chetvernikov(x_hat, context, idx_out=4, idx_in=3):
   torch.tensor
   """
   y, x = (torch.cat([x_hat, context], -1)[:, idx] for idx in (idx_out, idx_in))
+  argsort = torch.argsort(x)
+  y, x = y[argsort], x[argsort]
+  sigma = (y[:-1] - y[1:]).pow(2)
+  sigma = torch.cat([sigma, sigma[-1:]])
   k = lambda x: 0.75*(1-x.pow(2))
   h_max = (x.max()-x.min())/2
   n = y.size(0)
@@ -661,10 +666,10 @@ def monotonicity_penalty_chetvernikov(x_hat, context, idx_out=4, idx_in=3):
   y_dist = (y - y.unsqueeze(-1)) # i, j
   sgn = torch.sign(x_dist) * (x_dist.abs() < 1e-8) # i, j
   b = ((y_dist * sgn).unsqueeze(-1).unsqueeze(-1) * Q).sum(0).sum(0) # x, h
-  sigma = 1
-  V = ((sgn.unsqueeze(-1).unsqueeze(-1) * Q).sum(1).pow(2) * sigma).sum(0) # x, h
+  V = ((sgn.unsqueeze(-1).unsqueeze(-1) * Q).sum(1).pow(2)* sigma.unsqueeze(-1).unsqueeze(-1)).sum(0) # x, h
   T = b / V
   return T.max()
+
 
 def monotonicity_penalty_locallinear(x_hat, context, idx_out=4, idx_in=3, h=0.4):
   """
