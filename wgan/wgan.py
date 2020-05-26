@@ -633,7 +633,7 @@ def gaussian_similarity_penalty(x_hat, context, eps=1e-4):
     return loglik  
 
 
-def monotonicity_penalty_chetvernikov(x_hat, context, idx_out=4, idx_in=3):
+def monotonicity_penalty_chetverikov(x_hat, context, idx_out=4, idx_in=3):
   """
   Adds Chetverikov monotonicity test penalty.
   Incentivizes monotonicity of the mean of cat(x_hat, context)[:, dim_out] conditional on cat(x_hat, context)[:, dim_in].
