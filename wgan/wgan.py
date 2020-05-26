@@ -632,21 +632,60 @@ def gaussian_similarity_penalty(x_hat, context, eps=1e-4):
     loglik = gaussian.log_prob(x).mean()
     return loglik  
 
+def monotonicity_penalty_chetvernikov(x_hat, context, idx_out=4, idx_in=3):
+  """
+  Adds Chetverikov monotonicity test penalty.
+  Incentivizes monotonicity of the mean of cat(x_hat, context)[:, dim_out] conditional on cat(x_hat, context)[:, dim_in].
 
-def monotonicity_penalty(x_hat, context, dim_x, dim_context):
-    """
-    Incentivizes monotonicity of the mean of x_hat[:, dim_x] conditional on context[:, dim_d_context].
+  Parameters
+  ----------
+  x_hat: torch.tensor
+      generated data
+  context: torch.tensor
+      context data
 
-    Parameters
-    ----------
-    x_hat: torch.tensor
-        generated data
-    context: torch.tensor
-        context data
+  Returns
+  -------
+  torch.tensor
+  """
+  y, x = (torch.cat([x_hat, context], -1)[:, idx] for idx in (idx_out, idx_in))
+  k = lambda x: 0.75*(1-x.pow(2))
+  h_max = (x.max()-x.min())/2
+  n = y.size(0)
+  h_min = 0.4*h_max*(np.log(n)/n)**(1/3)
+  l_max = int((h_min/h_max).log()/np.log(0.5))
+  H = h_max * 0.5**torch.arange(l_max).to(x_hat.device)
+  x_dist = (x.unsqueeze(-1) - x) # i, j
+  Q = k(x_dist.unsqueeze(-1) / H) # i, j, h
+  Q = Q.unsqueeze(0) * Q.unsqueeze(1) # i, j, x, h
+  y_dist = (y - y.unsqueeze(-1)) # i, j
+  sgn = torch.sign(x_dist) * (x_dist.abs() < 1e-8) # i, j
+  b = ((y_dist * sgn).unsqueeze(-1).unsqueeze(-1) * Q).sum(0).sum(0) # x, h
+  sigma = 1
+  V = ((sgn.unsqueeze(-1).unsqueeze(-1) * Q).sum(1).pow(2) * sigma).sum(0) # x, h
+  T = b / V
+  return T.max()
 
-    Returns
-    -------
-    torch.tensor
-    """
-    # TODO
-    return 0
+def monotonicity_penalty_locallinear(x_hat, context, idx_out=4, idx_in=3, h=0.4):
+  """
+  Adds clamped local linear coefficient penalty.
+  Incentivizes monotonicity of the mean of cat(x_hat, context)[:, dim_out] conditional on cat(x_hat, context)[:, dim_in].
+
+  Parameters
+  ----------
+  x_hat: torch.tensor
+      generated data
+  context: torch.tensor
+      context data
+
+  Returns
+  -------
+  torch.tensor
+  """
+  y, x = (torch.cat([x_hat, context], -1)[:, idx] for idx in (idx_out, idx_in))
+  k = lambda x: (-x.pow(2)).exp()
+  W = k((x.unsqueeze(-1) - x)/h)
+  W = W/W.sum(-1, True)
+  x_diff, y_diff = [_ - (W*_).sum(-1, True) for _ in (x, y)]
+  beta = (x_diff*y_diff*W).sum(-1)/(x_diff.pow(2)*W).sum(-1)
+  return (-beta).clamp_min(0).sum()
