@@ -467,14 +467,14 @@ def train(generator, critic, x, context, specifications, penalty=None):
                     WD = critic_x - critic_x_hat
                     loss = - WD
                     loss += s["critic_gp_factor"] * critic.gradient_penalty(x, x_hat, context)
-                    if penalty is not None:
-                        loss += penalty(x_hat, context)
                     loss.backward()
                     opt_critic.step()
                     WD_train += WD.item()
                     n_batches += 1
                 else:
                     loss = - critic_x_hat
+                    if penalty is not None:
+                        loss += penalty(x_hat, context)
                     loss.backward()
                     opt_generator.step()
                 step += 1
