@@ -658,19 +658,19 @@ def monotonicity_penalty_chetverikov(x_hat, context, idx_out=4, idx_in=3):
   sigma = (y[:-1] - y[1:]).pow(2)
   sigma = torch.cat([sigma, sigma[-1:]])
   k = lambda x: 0.75*F.relu(1-x.pow(2))
-  h_max = (x.max()-x.min())/2
+  h_max = (x.max()-x.min()).detach()/2
   n = y.size(0)
   h_min = 0.4*h_max*(np.log(n)/n)**(1/3)
   l_max = int((h_min/h_max).log()/np.log(0.5))
-  H = h_max * 0.5**torch.arange(l_max).to(x_hat.device)
+  H = h_max * (torch.tensor([0.5])**torch.arange(l_max)).to(x_hat.device)
   x_dist = (x.unsqueeze(-1) - x) # i, j
   Q = k(x_dist.unsqueeze(-1) / H) # i, j, h
   Q = Q.unsqueeze(0) * Q.unsqueeze(1) # i, j, x, h
   y_dist = (y - y.unsqueeze(-1)) # i, j
-  sgn = torch.sign(x_dist) * (x_dist.abs() < 1e-8) # i, j
+  sgn = torch.sign(x_dist) * (x_dist.abs() > 1e-8) # i, j
   b = ((y_dist * sgn).unsqueeze(-1).unsqueeze(-1) * Q).sum(0).sum(0) # x, h
   V = ((sgn.unsqueeze(-1).unsqueeze(-1) * Q).sum(1).pow(2)* sigma.unsqueeze(-1).unsqueeze(-1)).sum(0) # x, h
-  T = b / V
+  T = b / (V + 1e-2)
   return T.max()
 
 
