@@ -674,7 +674,6 @@ def monotonicity_penalty_chetverikov(x_hat, context, idx_out=4, idx_in=3):
   return T.max()
 
 
-import torch.nn.functional as F
 def monotonicity_penalty_chetverikov(x_hat, context, idx_out=4, idx_in=0):
   """
   Adds Chetverikov monotonicity test penalty.
@@ -703,7 +702,7 @@ def monotonicity_penalty_chetverikov(x_hat, context, idx_out=4, idx_in=0):
   x_dist = (x.unsqueeze(-1) - x) # i, j
   Q = k(x_dist.unsqueeze(-1) / H) # i, j, h
   Q = Q.unsqueeze(0) * Q.unsqueeze(1) # i, j, x, h
-  y_dist = -(y - y.unsqueeze(-1)) # i, j
+  y_dist = (y.unsqueeze(-1) - y) # i, j
   sgn = torch.sign(x_dist) * (x_dist.abs() > 1e-8) # i, j
   b = ((y_dist * sgn).unsqueeze(-1).unsqueeze(-1) * Q).sum(0).sum(0) # x, h
   V = ((sgn.unsqueeze(-1).unsqueeze(-1) * Q).sum(1).pow(2)* sigma.unsqueeze(-1).unsqueeze(-1)).sum(0) # x, h
