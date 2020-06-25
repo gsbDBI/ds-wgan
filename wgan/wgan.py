@@ -189,6 +189,8 @@ class Specifications(object):
         Initial learning rate for critic
     critic_gp_factor: float
         Weight on gradient penalty for critic loss function
+    critic_optimizer: float
+        The torch.optim.Optimizer object used for training the critic network, per default torch.optim.Adam
     generator_d_hidden: list
         List of int, length equal to the number of hidden layers in generator,
         giving the size of each hidden layer.
@@ -199,8 +201,8 @@ class Specifications(object):
     generator_d_noise: int
         The dimension of the noise input to the generator. Default sets to the
         output dimension of the generator.
-    optimizer: torch.optim.Optimizer
-        The torch.optim.Optimizer object used for training the neural networks, per default torch.optim.Adam.
+    generator_optimizer: torch.optim.Optimizer
+        The torch.optim.Optimizer object used for training the generator network, per default torch.optim.Adam.
     max_epochs: int
         The number of times to train the network on the whole dataset.
     batch_size: int
@@ -240,7 +242,6 @@ class Specifications(object):
                  generator_lr = 1e-4,
                  generator_d_noise = "generator_d_output",
                  generator_optimizer = torch.optim.Adam,
-                 optimizer = torch.optim.Adam,
                  max_epochs = 1000,
                  batch_size = 32,
                  test_set_size = 16,
