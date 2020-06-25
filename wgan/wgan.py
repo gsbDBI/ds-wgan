@@ -433,9 +433,8 @@ def train(generator, critic, x, context, specifications, penalty=None):
     s = specifications.settings
     start_epoch, step, description, device, t = 0, 1, "", s["device"], time()
     generator.to(device), critic.to(device)
-    opt = s["optimizer"]
-    opt_generator = opt(generator.parameters(), lr=s["generator_lr"])
-    opt_critic = opt(critic.parameters(), lr=s["critic_lr"])
+    opt_generator = s["generator_optimizer"](generator.parameters(), lr=s["generator_lr"])
+    opt_critic = s["critic_optimizer"](critic.parameters(), lr=s["critic_lr"])
     train_batches, test_batches = D.random_split(D.TensorDataset(x, context), (x.size(0)-s["test_set_size"], s["test_set_size"]))
     train_batches, test_batches = (D.DataLoader(d, s["batch_size"], shuffle=True) for d in (train_batches, test_batches))
 
