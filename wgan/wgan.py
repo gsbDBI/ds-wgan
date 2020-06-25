@@ -203,7 +203,7 @@ class Specifications(object):
         The dimension of the noise input to the generator. Default sets to the
         output dimension of the generator.
     generator_optimizer: torch.optim.Optimizer
-        The torch.optim.Optimizer object used for training the generator network, per default torch.optim.Adam.
+        The torch.optim.Optimizer object used for training the generator network, per default "Optimistic Adam"
     max_epochs: int
         The number of times to train the network on the whole dataset.
     batch_size: int
@@ -235,14 +235,14 @@ class Specifications(object):
                  critic_d_hidden = [128,128,128],
                  critic_dropout = 0,
                  critic_steps = 15,
-                 critic_lr = 1e-4,
+                 critic_lr = 1e-3,
                  critic_gp_factor = 5,
                  critic_optimizer = torch.optim.Adam,
                  generator_d_hidden = [128,128,128],
                  generator_dropout = 0.1,
-                 generator_lr = 1e-4,
+                 generator_lr = 1e-3,
                  generator_d_noise = "generator_d_output",
-                 generator_optimizer = torch.optim.Adam,
+                 generator_optimizer = OAdam,
                  max_epochs = 1000,
                  batch_size = 32,
                  test_set_size = 16,
