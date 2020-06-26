@@ -283,6 +283,8 @@ class Specifications(object):
     ----------
     data_wrapper: wgan_model.DataWrapper
         Object containing details on data frame to be trained
+    optimizer: float
+        The torch.optim.Optimizer object used for training the networks, per default torch.optim.Adam
     critic_d_hidden: list
         List of int, length equal to the number of hidden layers in the critic,
         giving the size of each hidden layer.
@@ -294,8 +296,6 @@ class Specifications(object):
         Initial learning rate for critic
     critic_gp_factor: float
         Weight on gradient penalty for critic loss function
-    critic_optimizer: float
-        The torch.optim.Optimizer object used for training the critic network, per default torch.optim.Adam
     generator_d_hidden: list
         List of int, length equal to the number of hidden layers in generator,
         giving the size of each hidden layer.
@@ -307,7 +307,7 @@ class Specifications(object):
         The dimension of the noise input to the generator. Default sets to the
         output dimension of the generator.
     generator_optimizer: torch.optim.Optimizer
-        The torch.optim.Optimizer object used for training the generator network, per default "Optimistic Adam"
+        The torch.optim.Optimizer object used for training the generator network if different from "optimizer", per default the same
     max_epochs: int
         The number of times to train the network on the whole dataset.
     batch_size: int
@@ -336,17 +336,17 @@ class Specifications(object):
     ATTRIBUTES
     """
     def __init__(self, data_wrapper,
+                 optimizer = torch.optim.Adam,
                  critic_d_hidden = [128,128,128],
                  critic_dropout = 0,
                  critic_steps = 15,
-                 critic_lr = 1e-3,
+                 critic_lr = 1e-4,
                  critic_gp_factor = 5,
-                 critic_optimizer = torch.optim.Adam,
                  generator_d_hidden = [128,128,128],
                  generator_dropout = 0.1,
-                 generator_lr = 1e-3,
+                 generator_lr = 1e-4,
                  generator_d_noise = "generator_d_output",
-                 generator_optimizer = OAdam,
+                 generator_optimizer = "optimizer",
                  max_epochs = 1000,
                  batch_size = 32,
                  test_set_size = 16,
@@ -538,8 +538,9 @@ def train(generator, critic, x, context, specifications, penalty=None):
     s = specifications.settings
     start_epoch, step, description, device, t = 0, 1, "", s["device"], time()
     generator.to(device), critic.to(device)
-    opt_generator = s["generator_optimizer"](generator.parameters(), lr=s["generator_lr"])
-    opt_critic = s["critic_optimizer"](critic.parameters(), lr=s["critic_lr"])
+    opt_generator = s["optimizer"] if s["generator_optimizer"]=="optimizer" else s["generator_optimizer"]
+    opt_generator = opt_generator(generator.parameters(), lr=s["generator_lr"])
+    opt_critic = s["optimizer"](critic.parameters(), lr=s["critic_lr"])
     train_batches, test_batches = D.random_split(D.TensorDataset(x, context), (x.size(0)-s["test_set_size"], s["test_set_size"]))
     train_batches, test_batches = (D.DataLoader(d, s["batch_size"], shuffle=True) for d in (train_batches, test_batches))
 
