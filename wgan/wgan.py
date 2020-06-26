@@ -283,7 +283,7 @@ class Specifications(object):
     ----------
     data_wrapper: wgan_model.DataWrapper
         Object containing details on data frame to be trained
-    optimizer: float
+    optimizer: torch.optim.Optimizer
         The torch.optim.Optimizer object used for training the networks, per default torch.optim.Adam
     critic_d_hidden: list
         List of int, length equal to the number of hidden layers in the critic,
