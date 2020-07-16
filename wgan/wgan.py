@@ -172,25 +172,17 @@ class DataWrapper(object):
 
 
 class OAdam(torch.optim.Optimizer):
-    r"""Implements optimistic Adam algorithm.
-    Credit: https://github.com/georgepar/optimistic-adam
-    It has been proposed in `Training GANs with Optimism`_.
-    Arguments:
-        params (iterable): iterable of parameters to optimize or dicts defining
-            parameter groups
-        lr (float, optional): learning rate (default: 1e-3)
-        betas (Tuple[float, float], optional): coefficients used for computing
-            running averages of gradient and its square (default: (0.9, 0.999))
-        eps (float, optional): term added to the denominator to improve
-            numerical stability (default: 1e-8)
-        weight_decay (float, optional): weight decay (L2 penalty) (default: 0)
-        amsgrad (boolean, optional): whether to use the AMSGrad variant of this
-            algorithm from the paper `On the Convergence of Adam and Beyond`_
-            (default: False)
-    .. _Training GANs with Optimism:
-        https://arxiv.org/abs/1711.00141
+    """Implements optimistic Adam algorithm.
+    Copied from: https://github.com/georgepar/optimistic-adam
+    It has been proposed in `Training GANs with Optimism` (https://arxiv.org/abs/1711.00141)
+    
+    Parameters
+    ----------
+    see torch.optim.Adam
+    Returns
+    -------
+    torch.optim.Optimizer
     """
-
     def __init__(self, params, lr=1e-3, betas=(0.9, 0.999), eps=1e-8,
                  weight_decay=0, amsgrad=False):
         if not 0.0 <= lr:
@@ -219,7 +211,6 @@ class OAdam(torch.optim.Optimizer):
         loss = None
         if closure is not None:
             loss = closure()
-
         for group in self.param_groups:
             for p in group['params']:
                 if p.grad is None:
@@ -228,9 +219,7 @@ class OAdam(torch.optim.Optimizer):
                 if grad.is_sparse:
                     raise RuntimeError('Adam does not support sparse gradients, please consider SparseAdam instead')
                 amsgrad = group['amsgrad']
-
                 state = self.state[p]
-
                 # State initialization
                 if len(state) == 0:
                     state['step'] = 0
@@ -241,24 +230,18 @@ class OAdam(torch.optim.Optimizer):
                     if amsgrad:
                         # Maintains max of all exp. moving avg. of sq. grad. values
                         state['max_exp_avg_sq'] = torch.zeros_like(p.data)
-
                 exp_avg, exp_avg_sq = state['exp_avg'], state['exp_avg_sq']
                 if amsgrad:
                     max_exp_avg_sq = state['max_exp_avg_sq']
                 beta1, beta2 = group['betas']
-
                 state['step'] += 1
-
                 if group['weight_decay'] != 0:
                     grad.add_(group['weight_decay'], p.data)
-
                 bias_correction1 = 1 - beta1 ** state['step']
                 bias_correction2 = 1 - beta2 ** state['step']
                 step_size = group['lr'] * math.sqrt(bias_correction2) / bias_correction1
-
                 # Optimistic update :)
                 p.data.addcdiv_(step_size, exp_avg, exp_avg_sq.sqrt().add(group['eps']))
-
                 # Decay the first and second moment running average coefficient
                 exp_avg.mul_(beta1).add_(1 - beta1, grad)
                 exp_avg_sq.mul_(beta2).addcmul_(1 - beta2, grad, grad)
@@ -269,9 +252,7 @@ class OAdam(torch.optim.Optimizer):
                     denom = max_exp_avg_sq.sqrt().add_(group['eps'])
                 else:
                     denom = exp_avg_sq.sqrt().add_(group['eps'])
-
                 p.data.addcdiv_(-2.0 * step_size, exp_avg, denom)
-
         return loss   
     
 
@@ -744,45 +725,38 @@ def gaussian_similarity_penalty(x_hat, context, eps=1e-4):
     return loglik  
 
 
-def monotonicity_penalty_chetverikov(x_hat, context, idx_out=4, idx_in=3):
+def monotonicity_penalty_kernreg(factor, h=0.1, idx_out=4, idx_in=0, x_min=None, x_max=None, data_wrapper=None):
   """
-  Adds Chetverikov monotonicity test penalty.
+  Adds Kernel Regression monotonicity penalty.
   Incentivizes monotonicity of the mean of cat(x_hat, context)[:, dim_out] conditional on cat(x_hat, context)[:, dim_in].
-
   Parameters
   ----------
   x_hat: torch.tensor
       generated data
   context: torch.tensor
       context data
-
   Returns
   -------
   torch.tensor
   """
-  y, x = (torch.cat([x_hat, context], -1)[:, idx] for idx in (idx_out, idx_in))
-  argsort = torch.argsort(x)
-  y, x = y[argsort], x[argsort]
-  sigma = (y[:-1] - y[1:]).pow(2)
-  sigma = torch.cat([sigma, sigma[-1:]])
-  k = lambda x: 0.75*F.relu(1-x.pow(2))
-  h_max = (x.max()-x.min()).detach()/2
-  n = y.size(0)
-  h_min = 0.4*h_max*(np.log(n)/n)**(1/3)
-  l_max = int((h_min/h_max).log()/np.log(0.5))
-  H = h_max * (torch.tensor([0.5])**torch.arange(l_max)).to(x_hat.device)
-  x_dist = (x.unsqueeze(-1) - x) # i, j
-  Q = k(x_dist.unsqueeze(-1) / H) # i, j, h
-  Q = Q.unsqueeze(0) * Q.unsqueeze(1) # i, j, x, h
-  y_dist = (y - y.unsqueeze(-1)) # i, j
-  sgn = torch.sign(x_dist) * (x_dist.abs() > 1e-8) # i, j
-  b = ((y_dist * sgn).unsqueeze(-1).unsqueeze(-1) * Q).sum(0).sum(0) # x, h
-  V = ((sgn.unsqueeze(-1).unsqueeze(-1) * Q).sum(1).pow(2)* sigma.unsqueeze(-1).unsqueeze(-1)).sum(0) # x, h
-  T = b / (V + 1e-2)
-  return T.max()
+  if data_wrapper is not None:
+    x_std = torch.cat(data_wrapper.stds, -1).squeeze()[idx_in]
+    x_mean = torch.cat(data_wrapper.means, -1).squeeze()[idx_in]
+    x_min, x_max = ((x-x_mean)/(x_std+1e-3) for x in (x_min, x_max))
+  if x_min is None: x_min = x.min()
+  if x_max is None: x_max = x.max()
+  def penalty(x_hat, context):
+    y, x = (torch.cat([x_hat, context], -1)[:, idx] for idx in (idx_out, idx_in))
+    k = lambda x: (1-x.pow(2)).clamp_min(0)
+    x_grid = ((x_max-x_min)*torch.arange(20, device=x.device)/20 + x_min).detach()
+    W = k((x_grid.unsqueeze(-1) - x)/h).detach()
+    W = W/(W.sum(-1, True) + 1e-2)
+    y_mean = (W*y).sum(-1).squeeze()
+    return (factor * (y_mean[:-1]-y_mean[1:])).clamp_min(0).sum()
+  return penalty
 
 
-def monotonicity_penalty_chetverikov(x_hat, context, idx_out=4, idx_in=0):
+def monotonicity_penalty_chetverikov(factor, bound=0, idx_out=4, idx_in=0):
   """
   Adds Chetverikov monotonicity test penalty.
   Incentivizes monotonicity of the mean of cat(x_hat, context)[:, dim_out] conditional on cat(x_hat, context)[:, dim_in].
@@ -796,23 +770,25 @@ def monotonicity_penalty_chetverikov(x_hat, context, idx_out=4, idx_in=0):
   -------
   torch.tensor
   """
-  y, x = (torch.cat([x_hat, context], -1)[:, idx] for idx in (idx_out, idx_in))
-  argsort = torch.argsort(x)
-  y, x = y[argsort], x[argsort]
-  sigma = (y[:-1] - y[1:]).pow(2)
-  sigma = torch.cat([sigma, sigma[-1:]])
-  k = lambda x: 0.75*F.relu(1-x.pow(2))
-  h_max = (x.max()-x.min()).detach()/2
-  n = y.size(0)
-  h_min = 0.4*h_max*(np.log(n)/n)**(1/3)
-  l_max = int((h_min/h_max).log()/np.log(0.5))
-  H = h_max * (torch.tensor([0.5])**torch.arange(l_max)).to(x_hat.device)
-  x_dist = (x.unsqueeze(-1) - x) # i, j
-  Q = k(x_dist.unsqueeze(-1) / H) # i, j, h
-  Q = Q.unsqueeze(0) * Q.unsqueeze(1) # i, j, x, h
-  y_dist = (y.unsqueeze(-1) - y) # i, j
-  sgn = torch.sign(x_dist) * (x_dist.abs() > 1e-8) # i, j
-  b = ((y_dist * sgn).unsqueeze(-1).unsqueeze(-1) * Q).sum(0).sum(0) # x, h
-  V = ((sgn.unsqueeze(-1).unsqueeze(-1) * Q).sum(1).pow(2)* sigma.unsqueeze(-1).unsqueeze(-1)).sum(0) # x, h
-  T = b / (V + 1e-3)
-  return T.max()
+  def penalty(x_hat, context):
+    y, x = (torch.cat([x_hat, context], -1)[:, idx] for idx in (idx_out, idx_in))
+    argsort = torch.argsort(x)
+    y, x = y[argsort], x[argsort]
+    sigma = (y[:-1] - y[1:]).pow(2)
+    sigma = torch.cat([sigma, sigma[-1:]])
+    k = lambda x: 0.75*F.relu(1-x.pow(2))
+    h_max = torch.tensor((x.max()-x.min()).detach()/2).to(x_hat.device)
+    n = y.size(0)
+    h_min = 0.4*h_max*(np.log(n)/n)**(1/3)
+    l_max = int((h_min/h_max).log()/np.log(0.5))
+    H = h_max * (torch.tensor([0.5])**torch.arange(l_max)).to(x_hat.device)
+    x_dist = (x.unsqueeze(-1) - x) # i, j
+    Q = k(x_dist.unsqueeze(-1) / H) # i, j, h
+    Q = (Q.unsqueeze(0) * Q.unsqueeze(1)).detach() # i, j, x, h
+    y_dist = (y - y.unsqueeze(-1)) # i, j
+    sgn = torch.sign(x_dist) * (x_dist.abs() > 1e-8) # i, j
+    b = ((y_dist * sgn).unsqueeze(-1).unsqueeze(-1) * Q).sum(0).sum(0) # x, h
+    V = ((sgn.unsqueeze(-1).unsqueeze(-1) * Q).sum(1).pow(2)* sigma.unsqueeze(-1).unsqueeze(-1)).sum(0) # x, h
+    T = b / (V + 1e-2)
+    return T.max().clamp_min(0) * factor
+  return penalty
