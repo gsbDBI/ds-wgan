@@ -100,7 +100,7 @@ class DataWrapper(object):
             categorical = torch.tensor(pd.get_dummies(df[self.variables["categorical"]], columns=self.variables["categorical"]).to_numpy())
             x = torch.cat([x, categorical.to(torch.float)], -1)
         if len(self.variables["embedded_context"]) > 0:
-            embedded_context = torch.stack([torch.tensor(pd.Categorical(df[v], categories=self.emb_map[i]).values) for
+            embedded_context = torch.stack([torch.tensor(pd.Categorical(df[v], categories=self.emb_map[i]).codes) for
                                             i, v in enumerate(self.variables["embedded_context"])], -1)
             context = torch.cat([context, embedded_context.to(torch.float)], -1)
         total = torch.cat([x, context], -1)
