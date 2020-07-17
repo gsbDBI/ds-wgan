@@ -468,7 +468,7 @@ class Critic(nn.Module):
         d_in = [d["d_x"] + d["d_context"]] + s["critic_d_hidden"]
         d_out = s["critic_d_hidden"] + [1]
         self.layers = nn.ModuleList([nn.Linear(i, o) for i, o in zip(d_in, d_out)])
-        self.embeddings = nn.ModuleList([nn.Embedding(n, d) for n, d in zip(d.emb_counts, d.emb_dims)])
+        self.embeddings = nn.ModuleList([nn.Embedding(n, d) for n, d in zip(d["emb_counts"], d["emb_dims"])])
         self.dropout = nn.Dropout(s["critic_dropout"])
 
     def forward(self, x, context):
