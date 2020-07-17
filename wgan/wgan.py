@@ -407,7 +407,7 @@ class Generator(nn.Module):
         d_in = [self.d_noise + d["d_context"]] + s["generator_d_hidden"]
         d_out = s["generator_d_hidden"] + [self.d_cont + self.d_cat]
         self.layers = nn.ModuleList([nn.Linear(i, o) for i, o in zip(d_in, d_out)])
-        self.embeddings = nn.ModuleList([nn.Embedding(n, d) for n, d in zip(d.emb_counts, d.emb_dims)])
+        self.embeddings = nn.ModuleList([nn.Embedding(n, d) for n, d in zip(d["emb_counts"], d["emb_dims"])])
         self.dropout = nn.Dropout(s["generator_dropout"])
 
     def _transform(self, hidden):
