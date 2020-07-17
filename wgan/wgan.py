@@ -32,11 +32,12 @@ class DataWrapper(object):
         List of str of categorical variables to be generated
     context_vars: list
         List of str of variables that are conditioned on for cWGAN
+    embedded_context_vars: dict
+        Key is str with name of categorical variable that is to be embedded before being used as a context_var, value is dimension of embedding 
     continuous_lower_bounds: dict
         Key is element of continuous_vars, value is lower limit on that variable.
     continuous_upper_bounds: dict
         Key is element of continuous_vars, value is upper limit on that variable.
-
 
     ATTRIBUTES
     Attributes
@@ -51,20 +52,27 @@ class DataWrapper(object):
         List of dimension of each categorical variable
     cat_labels: list
         List of labels of each categorical variable
+    emb_dims: list
+        List of embedding dimensions for each embedded_context_var
+    emb_map: list
+        List of pd.Float64Index mapping integers to values of embedded_context_vars
     cont_bounds: torch.tensor
         formatted lower and upper bounds of continuous variables
     ATTRIBUTES
     """
-    def __init__(self, df, continuous_vars=[], categorical_vars=[], context_vars=[],
+    def __init__(self, df, continuous_vars=[], categorical_vars=[], context_vars=[], embedded_context_vars=dict(),
                  continuous_lower_bounds = dict(), continuous_upper_bounds = dict()):
         variables = dict(continuous=continuous_vars,
                          categorical=categorical_vars,
-                         context=context_vars)
+                         context=context_vars,
+                         embedded_context=list(embedded_context_vars.keys()))
         self.variables = variables
         continuous, context = [torch.tensor(np.array(df[variables[_]])).to(torch.float) for _ in ("continuous", "context")]
         self.means = [x.mean(0, keepdim=True) for x in (continuous, context)]
         self.stds  = [x.std(0,  keepdim=True) + 1e-5 for x in (continuous, context)]
         self.cat_dims = [df[v].nunique() for v in variables["categorical"]]
+        self.emb_dims = list(embedded_context_vars.values())
+        self.emb_map = [df[v].astype("category").cat.categories for v in embedded_context_vars.keys()]
         self.cat_labels = [torch.tensor(pd.get_dummies(df[v]).columns.to_numpy()).to(torch.float) for v in variables["categorical"]]
         self.cont_bounds = [[continuous_lower_bounds[v] if v in continuous_lower_bounds.keys() else -1e8 for v in variables["continuous"]],
                             [continuous_upper_bounds[v] if v in continuous_upper_bounds.keys() else 1e8 for v in variables["continuous"]]]
@@ -91,6 +99,10 @@ class DataWrapper(object):
         if len(self.variables["categorical"]) > 0:
             categorical = torch.tensor(pd.get_dummies(df[self.variables["categorical"]], columns=self.variables["categorical"]).to_numpy())
             x = torch.cat([x, categorical.to(torch.float)], -1)
+        if len(self.variables["embedded_context"]) > 0:
+            embedded_context = torch.stack([torch.tensor(pd.Categorical(df[v], categories=self.emb_map[i]).values) for
+                                            i, v in enumerate(self.variables["embedded_context"])], -1)
+            context = torch.cat([context, embedded_context.to(torch.float)], -1)
         total = torch.cat([x, context], -1)
         if not torch.all(total==total):
             raise RuntimeError("It looks like there are NaNs your data, at least after preprocessing. This is currently not supported!")
@@ -111,6 +123,7 @@ class DataWrapper(object):
         df: pandas.DataFrame
             DataFrame with data converted back to original scale
         """
+        context = context[:, :(context.size(-1)-len(self.emb_dims))]
         continuous, categorical = x.split((self.means[0].size(-1), sum(self.cat_dims)), -1)
         continuous, context = [x*s+m for x,m,s in zip([continuous, context], self.means, self.stds)]
         if categorical.size(-1) > 0:
@@ -339,14 +352,15 @@ class Specifications(object):
 
         self.settings = locals()
         del self.settings["self"], self.settings["data_wrapper"]
-        d_context = len(data_wrapper.
-                        variables["context"])
+        d_context = len(data_wrapper.variables["context"]) + sum(data_wrapper.emb_dims)
         d_cont = len(data_wrapper.variables["continuous"])
         d_x = d_cont + sum(data_wrapper.cat_dims)
         if generator_d_noise == "generator_d_output":
             self.settings.update(generator_d_noise = d_x)
         self.data = dict(d_context=d_context, d_x=d_x,
                          cat_dims=data_wrapper.cat_dims,
+                         emb_counts=[len(map) for map in data_wrapper.emb_map],
+                         emb_dims=data_wrapper.emb_dims,
                          cont_bounds=data_wrapper.cont_bounds)
 
         print("settings:", self.settings)
@@ -376,6 +390,8 @@ class Generator(nn.Module):
         Dimension of noise input to generator
     layers: torch.nn.ModuleList
         Dense neural network layers making up the generator
+    embeddings: torch.nn.ModuleList
+        Embedding layers for embedded_context_vars
     dropout: torch.nn.Dropout
         Dropout layer based on specifications
     ATTRIBUTES
@@ -391,6 +407,7 @@ class Generator(nn.Module):
         d_in = [self.d_noise + d["d_context"]] + s["generator_d_hidden"]
         d_out = s["generator_d_hidden"] + [self.d_cont + self.d_cat]
         self.layers = nn.ModuleList([nn.Linear(i, o) for i, o in zip(d_in, d_out)])
+        self.embeddings = nn.ModuleList([nn.Embedding(n, d) for n, d in zip(d.emb_counts, d.emb_dims)])
         self.dropout = nn.Dropout(s["generator_dropout"])
 
     def _transform(self, hidden):
@@ -416,6 +433,9 @@ class Generator(nn.Module):
         -------
         torch.tensor
         """
+        if len(self.embeddings) > 0:
+            context, embedded_context = context.split([context.size(-1)-len(self.embeddings), len(self.embeddings)], -1)
+            context = torch.cat([context] + [e(c) for e, c in zip(self.embeddings, embedded_context.t())], -1)
         noise = torch.randn(context.size(0), self.d_noise).to(context.device)
         x = torch.cat([noise, context], -1)
         for layer in self.layers[:-1]:
@@ -436,6 +456,8 @@ class Critic(nn.Module):
     ----------
     layers: torch.nn.ModuleList
         Dense neural network making up the critic
+    embeddings: torch.nn.ModuleList
+        Embedding layers for embedded_context_vars
     dropout: torch.nn.Dropout
         Dropout layer applied between each of hidden layers
     ATTRIBUTES
@@ -446,6 +468,7 @@ class Critic(nn.Module):
         d_in = [d["d_x"] + d["d_context"]] + s["critic_d_hidden"]
         d_out = s["critic_d_hidden"] + [1]
         self.layers = nn.ModuleList([nn.Linear(i, o) for i, o in zip(d_in, d_out)])
+        self.embeddings = nn.ModuleList([nn.Embedding(n, d) for n, d in zip(d.emb_counts, d.emb_dims)])
         self.dropout = nn.Dropout(s["critic_dropout"])
 
     def forward(self, x, context):
@@ -463,6 +486,9 @@ class Critic(nn.Module):
         -------
         torch.tensor
         """
+        if len(self.embeddings) > 0:
+            context, embedded_context = context.split([context.size(-1)-len(self.embeddings), len(self.embeddings)], -1)
+            context = torch.cat([context] + [e(c) for e, c in zip(self.embeddings, embedded_context.t())], -1)
         x = torch.cat([x, context], -1)
         for layer in self.layers[:-1]:
             x = self.dropout(F.relu(layer(x)))
