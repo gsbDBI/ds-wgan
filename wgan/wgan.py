@@ -100,9 +100,9 @@ class DataWrapper(object):
             categorical = torch.tensor(pd.get_dummies(df[self.variables["categorical"]], columns=self.variables["categorical"]).to_numpy())
             x = torch.cat([x, categorical.to(torch.float)], -1)
         if len(self.variables["embedded_context"]) > 0:
-            embedded_context = torch.stack([torch.tensor(pd.Categorical(df[v], categories=self.emb_map[i]).codes) for
+            embedded_context = torch.stack([torch.tensor(pd.Categorical(df[v], categories=self.emb_map[i]).codes).to(torch.float) for
                                             i, v in enumerate(self.variables["embedded_context"])], -1)
-            context = torch.cat([context, embedded_context.to(torch.float)], -1)
+            context = torch.cat([context, embedded_context], -1)
         total = torch.cat([x, context], -1)
         if not torch.all(total==total):
             raise RuntimeError("It looks like there are NaNs your data, at least after preprocessing. This is currently not supported!")
@@ -435,7 +435,7 @@ class Generator(nn.Module):
         """
         if len(self.embeddings) > 0:
             context, embedded_context = context.split([context.size(-1)-len(self.embeddings), len(self.embeddings)], -1)
-            context = torch.cat([context] + [e(c) for e, c in zip(self.embeddings, embedded_context.t())], -1)
+            context = torch.cat([context] + [e(c) for e, c in zip(self.embeddings, embedded_context.t().to(torch.long)], -1)
         noise = torch.randn(context.size(0), self.d_noise).to(context.device)
         x = torch.cat([noise, context], -1)
         for layer in self.layers[:-1]:
@@ -488,7 +488,7 @@ class Critic(nn.Module):
         """
         if len(self.embeddings) > 0:
             context, embedded_context = context.split([context.size(-1)-len(self.embeddings), len(self.embeddings)], -1)
-            context = torch.cat([context] + [e(c) for e, c in zip(self.embeddings, embedded_context.t())], -1)
+            context = torch.cat([context] + [e(c) for e, c in zip(self.embeddings, embedded_context.t().to(torch.long))], -1)
         x = torch.cat([x, context], -1)
         for layer in self.layers[:-1]:
             x = self.dropout(F.relu(layer(x)))
