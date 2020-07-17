@@ -435,7 +435,7 @@ class Generator(nn.Module):
         """
         if len(self.embeddings) > 0:
             context, embedded_context = context.split([context.size(-1)-len(self.embeddings), len(self.embeddings)], -1)
-            context = torch.cat([context] + [e(c) for e, c in zip(self.embeddings, embedded_context.t().to(torch.long)], -1)
+            context = torch.cat([context] + [e(c) for e, c in zip(self.embeddings, embedded_context.t().to(torch.long))], -1)
         noise = torch.randn(context.size(0), self.d_noise).to(context.device)
         x = torch.cat([noise, context], -1)
         for layer in self.layers[:-1]:
