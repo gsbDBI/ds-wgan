@@ -6,7 +6,7 @@ This [Google Colab Notebook](https://colab.research.google.com/drive/1V3TOkPcU8p
 
 Athey, Susan, Guido Imbens, Jonas Metzger, and Evan Munro.
 "Using Wasserstein Generative Adversial Networks for the Design of Monte Carlo Simulations."
-[arXiv:1909.02210](https://arxiv.org/abs/1909.02210). September 2019.
+[arXiv:1909.02210](https://arxiv.org/abs/1909.02210).
 
 The data folder contains the raw Lalonde-Dehejia-Wahba data.
 
