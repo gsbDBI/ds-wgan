@@ -141,7 +141,7 @@ class DataWrapper(object):
         # replaces or inserts columns in df with data from generator wherever possible
         generator.to("cpu")
         updated = self.variables["continuous"] + self.variables["categorical"]
-        df = df.drop(updated, axis=1).reset_index(drop=True).copy()
+        df = df.drop(updated, axis=1, errors="ignore").reset_index(drop=True).copy()
         df = self.df0.sample(len(df), replace=True).reset_index(drop=True).join(df)
         original_columns = self.df.columns
         x, context = self.preprocess(df)
