@@ -143,7 +143,7 @@ class DataWrapper(object):
         updated = self.variables["continuous"] + self.variables["categorical"]
         df = df.drop(updated, axis=1, errors="ignore").reset_index(drop=True).copy()
         df = self.df0.sample(len(df), replace=True).reset_index(drop=True).join(df)
-        original_columns = self.df.columns
+        original_columns = df.columns
         x, context = self.preprocess(df)
         x_hat = generator(context)
         df_hat = self.deprocess(x_hat, context)
